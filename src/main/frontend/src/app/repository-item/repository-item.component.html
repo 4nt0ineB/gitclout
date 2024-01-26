@@ -1,0 +1,16 @@
+<div class="repo-item" (click)="open()" >
+  {{repository.name}}<br>
+</div>
+<div *ngIf="isOpen" class="repoInfoOverview">
+  {{repository.url}}
+  <div class="progress" role="progressbar" aria-label="Example with label" aria-valuenow="25" aria-valuemin="0" aria-valuemax="100">
+    <div class="progress-bar" style="width: 25%">25%</div>
+  </div>
+  <br>
+  <ng-container *ngFor="let tagId of repository.tagsOrder; index as i; first as isFirst" style="padding: 1em;">
+
+      <a href="/{{tagId}}" style="text-decoration: none; color: inherit;">
+        <span style="margin-right: 0.5em; border: blue 0.5px solid; border-radius: 5px; padding: 0.2em;">{{repository.tags[tagId].name}}</span>
+      </a>
+  </ng-container>
+</div>

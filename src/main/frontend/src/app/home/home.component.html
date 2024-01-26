@@ -1,0 +1,19 @@
+<div class="container" style="padding-top: 10em; max-width: 50%;">
+  <div class="collection" >
+    <ng-container *ngFor="let repo of repositories; index as i; first as isFirst" >
+      <a href="#!" class="collection-item"
+         style="text-decoration: none; color: inherit;"
+         [ngClass]="{'active' : isFirst}">
+        <app-repository-item [repository]="repo"></app-repository-item>
+      </a>
+    </ng-container>
+  </div>
+
+  <hr>
+
+  <form >
+    <div class="col-sm-6">
+      <input type="text" class="form-control" id="repoAddressField" placeholder="ex: github.com/user/myrepo" >
+    </div>
+  </form>
+</div>

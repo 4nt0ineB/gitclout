@@ -10,11 +10,34 @@
 	</parent>
 	<groupId>fr.uge.gitclout</groupId>
 	<artifactId>gitclout</artifactId>
-	<version>0.0.1-SNAPSHOT</version>
+	<version>1.0.0</version>
 	<name>gitclout</name>
 	<description>A git repository contribution analyzer.</description>
 	<properties>
-		<java.version>21</java.version>
+		<mainClass>fr.uge.gitclout.GitcloutApplication</mainClass>
+		<project.name.fatjar>gitclout</project.name.fatjar>
+		<!-- paths -->
+		<project.frontend.dir>src/main/frontend</project.frontend.dir>
+		<project.resources.frontend.dir>src/main/resources/frontend</project.resources.frontend.dir>
+		<projet.backend.dir>src/main/java</projet.backend.dir>
+		<!-- some project config variables -->
+		<maven.compiler.source>21</maven.compiler.source>
+		<maven.compiler.target>${maven.compiler.source}</maven.compiler.target>
+		<project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
+		<project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
+		<!-- plugin versions -->
+		<version.plugin.compiler>3.11.0</version.plugin.compiler>
+		<version.plugin.dependency>3.6.0</version.plugin.dependency>
+		<version.plugin.jar>3.3.0</version.plugin.jar>
+		<version.plugin.resources>3.3.1</version.plugin.resources>
+		<version.plugin.surefire>3.1.2</version.plugin.surefire>
+		<version.plugin.junit>5.10.0</version.plugin.junit>
+		<version.plugin.jackson>2.15.2</version.plugin.jackson>
+		<version.plugin.jgit>6.7.0.202309050840-r</version.plugin.jgit>
+		<version.plugin.hsqldb>2.7.2</version.plugin.hsqldb>
+		<version.plugin.frontend-maven-plugin>1.14.0</version.plugin.frontend-maven-plugin>
+		<version.plugin.node>v18.18.0</version.plugin.node>
+		<version.plugin.npm>10.2.0</version.plugin.npm>
 	</properties>
 	<dependencies>
 		<dependency>
@@ -27,18 +50,130 @@
 			<artifactId>spring-boot-starter-test</artifactId>
 			<scope>test</scope>
 		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-webflux</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.springframework.boot</groupId>
+			<artifactId>spring-boot-starter-data-jpa</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>org.hsqldb</groupId>
+			<artifactId>hsqldb</artifactId>
+			<version>${version.plugin.hsqldb}</version>
+			<scope>runtime</scope>
+		</dependency>
+		<dependency>
+			<groupId>io.projectreactor</groupId>
+			<artifactId>reactor-test</artifactId>
+			<scope>test</scope>
+		</dependency>
+		<!--git repository access and algorithms-->
+		<dependency>
+			<groupId>org.eclipse.jgit</groupId>
+			<artifactId>org.eclipse.jgit</artifactId>
+			<version>${version.plugin.jgit}</version>
+		</dependency>
+		<!--Jackson-->
+		<dependency>
+			<groupId>com.fasterxml.jackson.core</groupId>
+			<artifactId>jackson-databind</artifactId>
+			<version>${version.plugin.jackson}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.module</groupId>
+			<artifactId>jackson-module-parameter-names</artifactId>
+			<version>${version.plugin.jackson}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jdk8</artifactId>
+			<version>${version.plugin.jackson}</version>
+		</dependency>
+		<dependency>
+			<groupId>com.fasterxml.jackson.datatype</groupId>
+			<artifactId>jackson-datatype-jsr310</artifactId>
+			<version>${version.plugin.jackson}</version>
+		</dependency>
 	</dependencies>
 
+
 	<build>
+		<finalName>${project.name.fatjar}-${project.version}</finalName>
 		<plugins>
 			<plugin>
 				<groupId>org.springframework.boot</groupId>
 				<artifactId>spring-boot-maven-plugin</artifactId>
+				<executions>
+					<execution>
+						<goals><goal>repackage</goal></goals>
+						<configuration>
+							<mainClass>{mainClass}</mainClass>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-compiler-plugin</artifactId>
+				<version>${version.plugin.compiler}</version>
 				<configuration>
-					<image>
-						<builder>paketobuildpacks/builder-jammy-base:latest</builder>
-					</image>
+					<release>21</release>
+					<compilerArgs>
+						<compilerArg>--enable-preview</compilerArg>
+						<compilerArg>-Xlint:all</compilerArg>
+					</compilerArgs>
 				</configuration>
+			</plugin>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-surefire-plugin</artifactId>
+				<version>${version.plugin.surefire}</version>
+				<configuration>
+					<argLine>--enable-preview</argLine>
+				</configuration>
+			</plugin>
+			<!-- Plugin to handle the React frontend build -->
+			<plugin>
+				<groupId>com.github.eirslett</groupId>
+				<artifactId>frontend-maven-plugin</artifactId>
+				<version>${version.plugin.frontend-maven-plugin}</version>
+				<configuration>
+					<nodeVersion>${version.plugin.node}</nodeVersion>
+					<npmVersion>${version.plugin.npm}</npmVersion>
+					<workingDirectory>src/main/frontend</workingDirectory>
+					<installDirectory>target</installDirectory>
+				</configuration>
+				<executions>
+					<execution>
+						<id>install node and npm</id>
+						<goals>
+							<goal>install-node-and-npm</goal>
+						</goals>
+						<phase>generate-resources</phase>
+					</execution>
+					<execution>
+						<id>npm install</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<phase>generate-resources</phase>
+						<configuration>
+							<arguments>install</arguments>
+						</configuration>
+					</execution>
+					<execution>
+						<id>npm run build</id>
+						<goals>
+							<goal>npm</goal>
+						</goals>
+						<phase>generate-resources</phase>
+						<configuration>
+							<arguments>run build</arguments>
+						</configuration>
+					</execution>
+				</executions>
 			</plugin>
 		</plugins>
 	</build>
