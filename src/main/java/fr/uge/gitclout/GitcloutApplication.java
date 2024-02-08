@@ -19,7 +19,7 @@ public class GitcloutApplication {
 		SpringApplication.run(GitcloutApplication.class, args);
 	}
 	
-	/*@Bean
+	@Bean
 	public CommandLineRunner commandLineRunner(
 			RepositoryService service
 	){
@@ -29,6 +29,6 @@ public class GitcloutApplication {
 				service.save(new RepositoryModel(str, str, str, str));
 			}
 		};
-	}*/
+	}
 
 }
