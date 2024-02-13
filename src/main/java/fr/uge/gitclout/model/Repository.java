@@ -3,31 +3,38 @@ package fr.uge.gitclout.model;
 import com.fasterxml.jackson.annotation.*;
 
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.*;
 import static java.util.stream.Collectors.toMap;
-import static org.hibernate.annotations.CascadeType.ALL;
 
 @Entity
 @Getter
 @Setter
-public class RepositoryModel {
+@AllArgsConstructor
+public class Repository {
+  public enum Status {
+    ANALYZED, IN_ANALYSIS, UPDATING;
+  }
+  
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
+  private String user;
   private String name;
   private String url;
   private @JsonIgnore String path;
   private String head;
+  private Status status;
   @JsonIgnore
   @OneToMany(targetEntity= Tag.class, cascade=CascadeType.REMOVE, mappedBy="repositoryId", fetch= FetchType.LAZY)
   private final List<Tag> tags = new ArrayList<>();
   
-  public RepositoryModel() {}
+  public Repository() {}
   
-  public RepositoryModel (String name, String url, String path, String head) {
+  public Repository(String name, String url, String path, String head) {
     Objects.requireNonNull(name, "The name can't be null");
     Objects.requireNonNull(url, "The url can't be null");
     Objects.requireNonNull(path, "The path can't be null");
@@ -38,7 +45,8 @@ public class RepositoryModel {
     this.head = head;
   }
   
-  
+  public record LightTag(UUID id, List<String> names){}
+  public record LightRepository(UUID id, String user, String name, String url, List<LightTag> tags, Status status) {}
   
  /* @JsonGetter
   @JsonProperty("tagsOrder")
@@ -86,9 +94,9 @@ public class RepositoryModel {
     return computedTagsBySha1;
   }*/
   
-  public RepositoryModel withTags(List<Tag> tags){
+  public Repository withTags(List<Tag> tags){
     Objects.requireNonNull(tags);
-    return new RepositoryModel(name, url, path, head);
+    return new Repository(name, url, path, head);
   }
   
   @Override

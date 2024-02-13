@@ -1,0 +1,36 @@
+{
+    "repositories" : [
+        {
+            "id": "be19123e-441b-49ab-b030-8ef6ae224cbb",
+            "Name": "Calimba",
+            "User": "Giraudo",
+            "url": "https://github.com/giraudo/Calimba",
+            "tags": [
+                {
+                    "id": "19abaabddef4a6047153b98831e1bab99191caa4",
+                    "name": "v1"
+                },
+                {
+                    "id": "2bb95214af01321c5de2712abaf0d914e2767709",
+                    "name": "v2"
+                }
+            ]
+        },
+        {
+            "id": "80675766-4fda-44ae-8b1c-deebb03bcb20",
+            "Name": "TestRepo",
+            "User": "Tester",
+            "url": "https://github.com/Tester/TestRepo",
+            "tags": [
+                {
+                    "id": "fa7b6e1c0a1c53f8840b477692e0cf5675cf054c",
+                    "name": "v1"
+                },
+                {
+                    "id": "80d2d653e8c4a45fd36e67701c03705f87a94f05",
+                    "name": "v2"
+                }
+            ]
+        }
+    ]
+}

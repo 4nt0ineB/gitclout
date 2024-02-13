@@ -35,7 +35,7 @@ public class Tag {
   @JsonInclude(JsonInclude.Include.NON_NULL)
   String name;
   @JsonIgnore
-  @OneToMany(mappedBy = "tagId", cascade = CascadeType.ALL, orphanRemoval = true)
+  @OneToMany(mappedBy = "tagId", cascade = CascadeType.ALL, orphanRemoval = true, fetch= FetchType.LAZY)
   @MapKey(name = "username")
   Map<String, Contribution> contributions;
   
@@ -43,7 +43,9 @@ public class Tag {
   
   public Tag(){}
   
+  public UUID id(){return id;}
   public String tagId(){return tagId;}
+  public String name(){return name;}
   public String parentId(){return parentId;}
   public int commitTime(){return commitTime;}
   

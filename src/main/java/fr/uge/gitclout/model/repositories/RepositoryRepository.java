@@ -1,15 +1,12 @@
 package fr.uge.gitclout.model.repositories;
 
-import fr.uge.gitclout.RepositoryService;
-import fr.uge.gitclout.model.RepositoryModel;
+import fr.uge.gitclout.model.Repository;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.repository.CrudRepository;
-import org.springframework.stereotype.Repository;
+import org.springframework.data.repository.ListCrudRepository;
 
-import java.util.Optional;
 import java.util.UUID;
 
-@Repository
-public interface RepositoryRepository extends JpaRepository<RepositoryModel, UUID> {
-  RepositoryModel findTopByOrderByIdDesc();
+@org.springframework.stereotype.Repository
+public interface RepositoryRepository extends ListCrudRepository<Repository, UUID> {
+  Repository findTopByOrderByIdDesc();
 }
