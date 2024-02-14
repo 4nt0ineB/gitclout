@@ -22,7 +22,7 @@ public class Repository {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
-  private String user;
+  private String userName;
   private String name;
   private String url;
   private @JsonIgnore String path;
@@ -44,6 +44,7 @@ public class Repository {
     this.path = path;
     this.head = head;
   }
+  
   
   public record LightTag(UUID id, List<String> names){}
   public record LightRepository(UUID id, String user, String name, String url, List<LightTag> tags, Status status) {}

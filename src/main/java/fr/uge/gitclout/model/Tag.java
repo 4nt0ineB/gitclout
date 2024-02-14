@@ -5,21 +5,20 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.Map;
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 
-/**
- *
- * @param id
- * @param parentId can be set to null
- * @param name
- */
+
 @Table(name="tag")
 @Entity
+@Setter
+@Getter
+@AllArgsConstructor
 public class Tag {
   
   @Id
@@ -27,7 +26,7 @@ public class Tag {
   private UUID id;
   @JsonProperty("tagId")
   String tagId;
-  long repositoryId;
+  UUID repositoryId;
   @JsonProperty
   int commitTime;
   @JsonProperty("parentTagId")
@@ -47,7 +46,12 @@ public class Tag {
   public String tagId(){return tagId;}
   public String name(){return name;}
   public String parentId(){return parentId;}
+  public UUID repositoryId(){return repositoryId;}
   public int commitTime(){return commitTime;}
+  
+  public Map<String, Contribution> getContributions() {
+    return contributions;
+  }
   
   public Tag(String tagId, long repositoryId, String parentId, String name) {
     Objects.requireNonNull(name, "name can't be null");

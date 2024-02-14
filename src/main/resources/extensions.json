@@ -1,0 +1,118 @@
+{
+  "CODE": {
+    "JAVA": {
+      "extension": ".java",
+      "extractions": {
+        "COMMENT": {
+          "inline": [".*?\\/\\/.*", ".*?\\/\\*.*?\\*\\/.*?" ],
+          "multiline": [[".*?\\/\\*.*?", ".*?\\*\\/.*?"]]
+        },
+        "DOCUMENTATION": {
+          "inline": [".*?\\/\\*\\*.*?\\*\\/.*?" ],
+          "multiline": [[".*?\\/\\*\\*.*?", ".*?\\*\\/.*?"]]
+        }
+      }
+    },
+    "JASM": {
+      "extension": ".java",
+      "extractions": {
+        "COMMENT": {
+          "inline": [".*?\\/\\/.*", ".*?\\/\\*.*?\\*\\/.*?" ],
+          "multiline": [[".*?\\/\\*.*?", ".*?\\*\\/.*?"]]
+        },
+        "DOCUMENTATION": {
+          "inline": [".*?\\/\\*\\*.*?\\*\\/.*?" ],
+          "multiline": [[".*?\\/\\*\\*.*?", ".*?\\*\\/.*?"]]
+        }
+      }
+    },
+    "PHP": {
+      "extension": ".php",
+      "extractions": {
+        "COMMENT": {
+          "inline": [".*?\\/\\/.*", ".*?\\/\\*.*?\\*\\/.*?" ],
+          "multiline": [[".*?\\/\\*.*?", ".*?\\*\\/.*?"]]
+        },
+        "DOCUMENTATION": {
+          "inline": [".*?\\/\\*\\*.*?\\*\\/.*?" ],
+          "multiline": [[".*?\\/\\*\\*.*?", ".*?\\*\\/.*?"]]
+        }
+      }
+    },
+    "CSS": {
+      "extension": ".css",
+      "extractions": {
+        "COMMENT": {
+          "inline": [".*?\\/\\/.*", ".*?\\/\\*.*?\\*\\/.*?" ],
+          "multiline": [[".*?\\/\\*.*?", ".*?\\*\\/.*?"]]
+        }
+      }
+    },
+    "OCaml": {
+      "extension": ".ml",
+      "extractions": {
+        "COMMENT": {
+          "inline": [".*?\\(\\*.*\\*\\)"]
+        },
+        "DOCUMENTATION": {
+          "multiline": [[".*?\\(\\*.*(?<!\\*\\))", "(?!.*\\(\\*).*?\\*\\).*"]]
+        }
+      }
+    },
+    "C": {
+      "extension": ".c",
+      "extractions": {
+        "COMMENT": {
+          "inline": [".*?\\/\\/.*", ".*?\\/\\*.*?\\*\\/.*?" ],
+          "multiline": [[".*?\\/\\*.*?", ".*?\\*\\/.*?"]]
+        },
+        "DOCUMENTATION": {
+          "inline": [".*?\\/\\*\\*.*?\\*\\/.*?" ],
+          "multiline": [[".*?\\/\\*\\*.*?", ".*?\\*\\/.*?"]]
+        }
+      }
+    },
+    "RUBY": {
+      "extension": ".rb"
+    },
+    "JAVASCRIPT": {
+      "extension": ".js",
+      "extractions": {
+        "COMMENT": {
+          "inline": [".*?\\/\\/.*", ".*?\\/\\*.*?\\*\\/.*?" ],
+          "multiline": [[".*?\\/\\*.*?", ".*?\\*\\/.*?"]]
+        },
+        "DOCUMENTATION": {
+          "inline": [".*?\\/\\*\\*.*?\\*\\/.*?" ],
+          "multiline": [[".*?\\/\\*\\*.*?", ".*?\\*\\/.*?"]]
+        }
+      }
+    },
+    "HTML": {
+      "extension": ".html"
+    },
+    "PYTHON": {
+      "extension": ".py",
+      "extractions": {
+        "COMMENT": {
+          "inline": [".*?\\#.*?", ".*?\\\"\\\"\\\".*?\\\"\\\"\\\"", ".*?\\'\\'\\'\\.*?\\'\\'\\'"]
+        },
+        "DOCUMENTATION": {
+          "multiline": [[".*?\\\"\\\"\\\".*?", ".*?\\\"\\\"\\\".*?"]]
+        }
+      }
+    }
+  },
+  "CONFIG": {
+    "GIT": ".gitignore",
+    "YAML": ".yaml"
+  },
+  "DOC": {
+    "MARKDOWN": ".md"
+  },
+  "BUILD": {
+    "MAKE": "makefile",
+    "MAVEN": "pom.xml",
+    "GRADLE": ".gradle"
+  }
+}

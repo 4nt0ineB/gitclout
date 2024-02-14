@@ -1,5 +1,6 @@
 package fr.uge.gitclout.analyzer.parser;
 
+import fr.uge.gitclout.Utils;
 import fr.uge.gitclout.model.Contribution;
 import fr.uge.gitclout.model.Tag;
 import org.eclipse.jgit.api.Git;
@@ -25,10 +26,13 @@ import java.util.concurrent.Executors;
 import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
+import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.*;
+
+
 
 public class Analyzer {
   // ---------------
@@ -48,13 +52,7 @@ public class Analyzer {
   private final Parser parser;
   private final FileTypes fileTypes;
   
-  // ---------------
-  // Repository Information
-  // ---------------
-  private String url;
-  private String localRepositoryPath;
   private ObjectId head;
-  private String repositoryName;
   
   // ---------------
   // Analysis Progress
@@ -65,39 +63,38 @@ public class Analyzer {
   // ---------------
   // Repository Handling
   // ---------------
-  private final RepositoryModel repositoryModel;
-  private Repository repository;
+  private final fr.uge.gitclout.model.Repository repository;
+  private Repository gitRepository;
   private Git git;
   private Map<RevCommit, Set<Ref>> tagsOfCommits;
+  
+  private final Consumer<Tag> fct;
   
   // ---------------
   // Analysis Control
   // ---------------
   private final AtomicBoolean isCanceled = new AtomicBoolean(false);
   
-  public Analyzer(Parser parser, FileTypes fileTypes, String url, int analysisPoolSize) {
-    
-    this(parser, fileTypes, url, analysisPoolSize, false, null);
-  }
   
-  private Analyzer(Parser parser, FileTypes fileTypes, String url, int analysisPoolSize, boolean isUpdate, RepositoryModel repositoryModel) {
+  public Analyzer(Parser parser, FileTypes fileTypes, int analysisPoolSize, boolean isUpdate, fr.uge.gitclout.model.Repository repository,  Consumer<Tag> fct) {
     Objects.requireNonNull(parser);
     Objects.requireNonNull(fileTypes);
-    Objects.requireNonNull(url);
+    Objects.requireNonNull(repository);
     if (analysisPoolSize < 1) {
       throw new IllegalArgumentException("PoolSize can't be less than 1");
     }
     this.parser = parser;
     this.fileTypes = fileTypes;
-    this.url = url;
     this.analysisPoolSize = analysisPoolSize;
     this.isUpdate = isUpdate;
-    this.repositoryModel = repositoryModel;
+    this.repository = repository;
+    this.fct = fct;
   }
   
   
-  public static Analyzer forUpdate(Parser parser, FileTypes fileTypes, RepositoryModel repositoryModel, int analysisPoolSize) {
-    return new Analyzer(parser, fileTypes, repositoryModel.url(), analysisPoolSize, true, repositoryModel);
+  public static Analyzer forUpdate(Parser parser, FileTypes fileTypes, int analysisPoolSize) {
+    return null;
+    //return new Analyzer(parser, fileTypes, repositoryModel.url(), analysisPoolSize, true, repositoryModel);
   }
   
   public boolean isUpdate() {
@@ -112,39 +109,27 @@ public class Analyzer {
     return tagsAnalyzed.get();
   }
   
-  public String url() {
-    return url;
-  }
-  
-  public String repositoryName() {
-    return repositoryName;
-  }
-  
-  public String localRepositoryPath() {
-    return localRepositoryPath;
-  }
-  
   public void cancel() {
     isCanceled.set(true);
   }
   
   public static void main(String[] args) throws GitAPIException, IOException {
-    var path = Config.create().get("app.extensions")
-                     .asString()
-                     .orElseThrow(() -> new IOException("extensions.json configuration file could not be found"));
-    var jsonString = Utils.fileToString(path);
+//    var path = Config.create().get("app.extensions")
+//                     .asString()
+//                     .orElseThrow(() -> new IOException("extensions.json configuration file could not be found"));
+/*    var jsonString = Utils.fileToString("nopath");
     var parser = new Parser();
     var analyzer = new Analyzer(parser, FileTypes.fromJson(jsonString),
         "https://github.com/SamueleGiraudo/Calimba.git", 2);
     analyzer.localRepositoryPath = ".gitclout-data/repositories/test-repo";
     var file = new File(analyzer.localRepositoryPath);
-    RepositoryModel result;
+    //RepositoryModel result;
     analyzer.url = "";
     analyzer.repositoryName = "";
     try (var gitRepo = Git.open(file)) {
       analyzer.git = gitRepo;
-      result = analyzer.runAnalysis(null);
-    }
+      //result = analyzer.runAnalysis(null);
+    }*/
   }
   
   /**
@@ -153,23 +138,19 @@ public class Analyzer {
    * @return A RepositoryModel object representing the analyzed repository.
    * @throws IOException     If the analysis fails.
    */
-  public RepositoryModel analyze() throws IOException {
-    setUrl(url);
+  public Repository analyze(fr.uge.gitclout.model.Repository repository) throws IOException {
+    /*setUrl(url);
     if (isUpdate) {
       return updateRepository(repositoryModel);
-    }
-    var file = new File(localRepositoryPath);
-    if (file.exists()) {
-      throw new IllegalArgumentException("The repository already exists");
-    }
-    try (var gitRepo = Git.cloneRepository().setURI(url)
-                          .setBare(true)
-                          .setDirectory(file).call()) {
+    }*/
+    var file = new File(repository.getPath());
+    try (var gitRepo = Git.open(file)) {
       git = gitRepo;
-      return runAnalysis(null);
+      runAnalysis(null);
     } catch (GitAPIException e) {
       throw new IOException(e);
     }
+    return null;
   }
   
   /**
@@ -177,20 +158,21 @@ public class Analyzer {
    * @param tagParentMap The map representing tag-parent relationships (can be null to generate the map).
    * @return A RepositoryModel representing the analyzed repository.
    */
-  private RepositoryModel runAnalysis(Map<RevCommit, RevCommit> tagParentMap) throws IOException, GitAPIException {
-    repository = git.getRepository();
-    head = repository.resolve("HEAD");
+  private void runAnalysis(Map<RevCommit, RevCommit> tagParentMap) throws IOException, GitAPIException {
+    gitRepository = git.getRepository();
+    head = gitRepository.resolve("HEAD");
     if (tagParentMap == null) {
       tagsOfCommits = mapTagsToCommit(git);
       var tags = git.tagList().call();
-      tagParentMap = getTagParentMap(repository, tags);
+      tagParentMap = getTagParentMap(gitRepository, tags);
     }
     totalTags = tagParentMap.size();
     var contributions = mutlithreadTasks(tagParentMap);
     if (isCanceled.get()) {
-      return buildRepositoryModel(Map.of());
+      // return buildRepositoryModel(Map.of());
     }
-    return analysisToModel(contributions);
+    //return analysisToModel(contributions);
+    analysisToModel(contributions);
   }
   
   /**
@@ -199,7 +181,7 @@ public class Analyzer {
    * @param tagDetail List of ContributionsOfTag objects containing tag analysis details.
    * @return A RepositoryModel object representing the analyzed repository.
    */
-  private RepositoryModel analysisToModel(List<ContributionsOfTag> tagDetail) {
+  private Repository analysisToModel(List<ContributionsOfTag> tagDetail) {
     var tagBySha1 = buildTagMap(tagDetail);
     var computedTags = new HashMap<String, Tag>();
     var computedTagsFromOld = new HashMap<String, Tag>();
@@ -217,11 +199,12 @@ public class Analyzer {
       var topTag = toVisit.peekFirst();
       // get the last tag of the old repo,
       // that is the oldest ancestor of all new tags (parent of topTag)
-      var origin = repositoryModel.tags().stream()
-                                  .filter(t -> t.id().equals(topTag.parent.getName()))
+      var origin = repository.getTags().stream()
+                                  .filter(t -> t.tagId().equals(topTag.parent.getName()))
                                   .findFirst().orElseThrow();
-      computedTags.put(topTag.parent.getName(), origin.withParent(Optional.empty()));
-      var bla = repositoryModel.tags().stream().filter(t -> t.commitTime() < origin.commitTime())
+      //var newOrigin = new Tag(origin.id(), origin.tagId(), origin.repositoryId(), null, origin.name(), origin);
+      computedTags.put(topTag.parent.getName(), origin); // <- newOrigin !!!! @Todo
+      var bla = repository.getTags().stream().filter(t -> t.commitTime() < origin.commitTime())
                                .collect(Collectors.toMap(Tag::parentId, t -> t));
       computedTagsFromOld.putAll(bla);
       var mapped = bla.values().stream().map(t ->{
@@ -235,14 +218,15 @@ public class Analyzer {
       tagBySha1 = buildTagMap(mapped);
       processTagDetails(tagBySha1, computedTags, computedTagsFromOld, toVisit);
     }
-    return buildRepositoryModel(computedTags);
+    computedTags.values().stream().forEach(fct);
+    return null;
   }
   
   private ContributionsOfTag contributionsOfTagFromTag(Tag tag) throws IOException {
-    return new ContributionsOfTag(repository.parseCommit(repository.resolve(tag.id()))
-        , repository.parseCommit(repository.resolve(tag.id()))
-        , tag.contributions().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
-        entry -> entry.getValue().detail()))
+    return new ContributionsOfTag(gitRepository.parseCommit(gitRepository.resolve(tag.tagId()))
+        , gitRepository.parseCommit(gitRepository.resolve(tag.tagId()))
+        , tag.getContributions().entrySet().stream().collect(Collectors.toMap(Map.Entry::getKey,
+        entry -> entry.getValue().getDetail()))
     );
   }
   
@@ -293,10 +277,11 @@ public class Analyzer {
           }
         }
       }
+      var tag = new Tag(current.commit.getName(), commitTime, parentId, names);
       var mappedContributions = contributions.entrySet().stream()
                                              .collect(toMap(Map.Entry::getKey,
-                                                 entry -> new Contribution(entry.getValue(), fileTypes)));
-      var tag = new Tag(current.commit.getName(), commitTime, parentId, names, mappedContributions);
+                                                 entry -> new Contribution(null, tag.tagId(), entry.getKey(), entry.getValue())));
+      tag.getContributions().putAll(mappedContributions);
       computedTags.put(current.commit.getName(), tag);
       var children = tagBySha1.get(current.commit.getName());
       if (children != null) {
@@ -331,10 +316,10 @@ public class Analyzer {
   private static HashMap<String, Map<String, Integer>> addContributionsOfTag(Analyzer.ContributionsOfTag contributionsOfTag
       , Tag tag){
     var contributionsCombined = new HashMap<>(contributionsOfTag.contributions);
-    for (var entry : tag.contributions().entrySet()) {
+    for (var entry : tag.getContributions().entrySet()) {
       var key = entry.getKey();
       var innerMap = entry.getValue()
-                          .detail();
+                          .getDetail();
       contributionsCombined.merge(key, innerMap, (innerMap1, innerMap2Values) -> {
         innerMap2Values.forEach((innerKey, value) ->
             innerMap1.merge(innerKey, value, Integer::sum));
@@ -344,11 +329,12 @@ public class Analyzer {
     return contributionsCombined;
   }
   
-  private RepositoryModel buildRepositoryModel(Map<String, Tag> computedTags) {
-    return new RepositoryModel(UUID.randomUUID(),
+  private Repository buildRepositoryModel(Map<String, Tag> computedTags) {
+    return null;
+    /*return new Repository(UUID.randomUUID(),
         repositoryName, url, localRepositoryPath,
         head.toObjectId().name(),
-        computedTags.values().stream().toList());
+        computedTags.values().stream().toList());*/
   }
   
   /**
@@ -361,18 +347,18 @@ public class Analyzer {
    * @param url The repository URL, expected to be in the format "https://.../userName/repositoryName.git"
    * @throws IllegalArgumentException If the provided URL does not match the expected pattern.
    */
-  private void setUrl(String url) {
-    this.url = url;
-    Pattern pattern = Pattern.compile(".*/(?<userName>.*)/(?<repositoryName>.*?)(\\.git)?");
-    var matcher = pattern.matcher(url);
-    if (matcher.matches()) {
-      repositoryName = matcher.group("repositoryName");
-      localRepositoryPath = ".gitclout-data/repositories/" + matcher.group("userName") + "-" + repositoryName;
-      return;
-    }
-    System.err.println("The url is not valid");
-    throw new IllegalArgumentException("The url is not valid");
-  }
+ // private void setUrl(String url) {
+//    this.url = url;
+//    Pattern pattern = Pattern.compile(".*/(?<userName>.*)/(?<repositoryName>.*?)(\\.git)?");
+//    var matcher = pattern.matcher(url);
+//    if (matcher.matches()) {
+//      repositoryName = matcher.group("repositoryName");
+//      localRepositoryPath = ".gitclout-data/repositories/" + matcher.group("userName") + "-" + repositoryName;
+//      return;
+//    }
+//    System.err.println("The url is not valid");
+//    throw new IllegalArgumentException("The url is not valid");
+ // }
   
   /**
    * Retrieve an AbstractTreeIterator for a specific commit SHA1.
@@ -546,12 +532,12 @@ public class Analyzer {
    * @throws GitAPIException If an error occurs during Git operations.
    */
   private Map<String, Map<String, Integer>> diffBetweenTwoTags(String newTagSHA1, String oldTagSHA1) throws IOException, GitAPIException {
-    var newTagRevCommit = repository.parseCommit(repository.resolve(newTagSHA1));
+    var newTagRevCommit = gitRepository.parseCommit(gitRepository.resolve(newTagSHA1));
     var newTagTree = getTreeIterator(newTagSHA1);
     var oldTagTree = oldTagSHA1 != null ? getTreeIterator(oldTagSHA1) : new EmptyTreeIterator();
     Map<String, Map<String, Integer>> contributions = new HashMap<>();
     try (DiffFormatter diffFormatter = new DiffFormatter(DisabledOutputStream.INSTANCE)) {
-      diffFormatter.setRepository(repository);
+      diffFormatter.setRepository(gitRepository);
       diffFormatter.setDiffComparator(RawTextComparator.DEFAULT);
       diffFormatter.setDetectRenames(true);
       List<DiffEntry> diffs = diffFormatter.scan(oldTagTree, newTagTree);
@@ -655,14 +641,14 @@ public class Analyzer {
       return Map.of();
     }
     var fileType = guessedExtension.orElseThrow();
-    var pathRelativeToCommit = repository.resolve(commit.getId().getName() + ":" + filePath);
+    var pathRelativeToCommit = gitRepository.resolve(commit.getId().getName() + ":" + filePath);
     var blame = git.blame()
                    .setFilePath(entry.getNewPath())
                    .setStartCommit(commit)
                    .setFollowFileRenames(true)
                    .call();
     var indices = triggeredLines(diffFormatter, entry);
-    try (var inputStream = repository.open(pathRelativeToCommit).openStream()) {
+    try (var inputStream = gitRepository.open(pathRelativeToCommit).openStream()) {
       var extractions = parser.parseInputStreamWith(inputStream, fileType);
       // Group by author and sum contributions for code and comment lines
       return calculateContributions(blame, indices, extractions);
@@ -685,18 +671,18 @@ public class Analyzer {
    * @return The updated RepositoryModel instance after applying the changes.
    * @throws IOException     If the analysis fails.
    */
-  private RepositoryModel updateRepository(RepositoryModel repositoryToBeUpdated) throws IOException {
+ /* private RepositoryModel updateRepository(RepositoryModel repositoryToBeUpdated) throws IOException {
     Objects.requireNonNull(repositoryToBeUpdated, "The repository can't be null");
     try (Git gitRepo = Git.open(new File(repositoryToBeUpdated.path()))) {
       git = gitRepo;
-      repository = git.getRepository();
+      gitRepository = git.getRepository();
       var oldTagList = git.tagList().call();
-      var oldTagParentMap = getTagParentMap(repository, oldTagList);
+      var oldTagParentMap = getTagParentMap(gitRepository, oldTagList);
       // Pull the latest changes from the remote repository
       deleteLocalTags(git, oldTagList);
       FetchResult result = git.fetch().setCheckFetchedObjects(true).call();
       var newTagList = git.tagList().call();
-      var newTagParentMap = getTagParentMap(repository, newTagList);
+      var newTagParentMap = getTagParentMap(gitRepository, newTagList);
       // Delete ------ update relationship
       var tagList = new ArrayList<>(repositoryToBeUpdated.tags());
       updateProcessTagRemoval(oldTagParentMap, newTagParentMap, tagList);
@@ -712,7 +698,7 @@ public class Analyzer {
     } catch (GitAPIException e) {
       throw new IOException(e);
     }
-  }
+  }*/
   
   /**
    * has side effects on tagList
@@ -736,8 +722,8 @@ public class Analyzer {
         // update its parent sha1 reference
         optTag.ifPresent(tag -> {
           tagList.removeIf(tagToDel -> tagToDel.id().equals(childSha1.getName()));
-          var newCurrentTag = tag.withParent(parentSha1 == null ? Optional.empty(): Optional.of(parentSha1.getName()));
-          tagList.add(newCurrentTag);
+          tag.setParentId(parentSha1 == null ? null : parentSha1.getName());
+          tagList.add(tag);
         });
       });
       tagList.removeIf(t -> t.id().equals(currentSha1.getName()));
@@ -760,9 +746,9 @@ public class Analyzer {
         // case 1 - commit exists in old map (already analyzed)
         var newNames = getAllTagNames(currentCommit);
         var tag = commitInOldRepo.orElseThrow();
-        var newCurrentTag = tag.withName(newNames);
+        tag.setName(newNames);
         tagList.remove(tag);
-        tagList.add(newCurrentTag);
+        tagList.add(tag);
       } else {
         // case 2 - just analyze the tag
         var parent = rel.getValue();
@@ -771,8 +757,8 @@ public class Analyzer {
         // update its parent sha1 reference
         child.ifPresent(tag -> {
           tagList.removeIf(tagToDel -> tagToDel.id().equals(tag.id()));
-          var newCurrentTag = tag.withParent(Optional.of(currentCommit.getName()));
-          tagList.add(newCurrentTag);
+          tag.setParentId(currentCommit.getName());
+          tagList.add(tag);
         });
       }
     }
@@ -781,7 +767,7 @@ public class Analyzer {
   
   
   private HashMap<String, Tag> tagListToMapById(List<Tag> tags){
-    return tags.stream().collect(Collectors.toMap(Tag::id, a -> a, (a, b) -> a, HashMap::new));
+    return tags.stream().collect(Collectors.toMap(Tag::tagId, a -> a, (a, b) -> a, HashMap::new));
   }
   
   /**
@@ -804,4 +790,6 @@ public class Analyzer {
     }
     return changedTags;
   }
+  
+  
 }

@@ -1,23 +1,38 @@
 package fr.uge.gitclout.analyzer.parser;
 
+import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonValue;
+import fr.uge.gitclout.RepositoryService;
 import fr.uge.gitclout.model.Repository;
+import fr.uge.gitclout.model.Tag;
+import org.eclipse.jgit.api.Git;
+import org.eclipse.jgit.api.errors.GitAPIException;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
+import java.io.IOException;
+import java.util.List;
+import java.util.Locale;
+import java.util.Objects;
+import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
+import java.util.function.Consumer;
 import java.util.logging.Logger;
+import java.util.regex.Pattern;
+import java.util.stream.Stream;
 
 /**
  * The AnalysisManager class orchestrates the analysis of repositories using analyzers.
  * It manages the submission, execution, and cancellation of analysis tasks.
  */
-@Service
+
 public class AnalysisManager {
   
   // dependencies
   private final FileTypes fileTypes;
   private final Parser parser;
-  private final DaoManager daoManager;
   private final int concurrentAnalysis;
   private final int analysisPoolSize;
   // managing tasks and results
@@ -32,15 +47,12 @@ public class AnalysisManager {
    *
    * @param parser     The parser used for analysis.
    * @param fileTypes  The file types manager.
-   * @param daoManager The DAO manager for database operations.
    */
-  public AnalysisManager(Parser parser, FileTypes fileTypes, DaoManager daoManager, int concurrentAnalysis, int analysisPoolSize) {
+  public AnalysisManager(Parser parser, FileTypes fileTypes, int concurrentAnalysis, int analysisPoolSize) {
     Objects.requireNonNull(parser);
     Objects.requireNonNull(fileTypes);
-    Objects.requireNonNull(daoManager);
     this.parser = parser;
     this.fileTypes = fileTypes;
-    this.daoManager = daoManager;
     this.concurrentAnalysis = concurrentAnalysis;
     this.analysisPoolSize = analysisPoolSize;
     startAnalysisPool();
@@ -90,16 +102,6 @@ public class AnalysisManager {
       return analyzer.analyzedTags();
     }
     
-    @JsonGetter
-    public String url() {
-      return analyzer.url();
-    }
-    
-    @JsonGetter
-    public String repositoryName() {
-      return analyzer.repositoryName();
-    }
-    
     private void setStatus(Status status) {
       this.status = status;
     }
@@ -122,7 +124,7 @@ public class AnalysisManager {
           try {
             runningAnalysis.put(task, Thread.currentThread());
             task.setStatus(Task.Status.RUNNING);
-            var repo = task.analyzer.analyze();
+            /*var repo = task.analyzer.analyze();
             if(task.analyzer.isUpdate()){
               daoManager.repository().delete(repo).subscribe(unused -> {
                 daoManager.repository().save(repo).subscribe(no -> {});
@@ -131,9 +133,9 @@ public class AnalysisManager {
               RepositoryDao.deleteLocalFolderIfExists(repo);
             } else {
               daoManager.repository().save(repo).subscribe(unused -> {});
-            }
+            }*/
             runningAnalysis.remove(task);
-          } catch (IOException e) {
+          } catch (Exception e) {
             LOGGER.info(e.getMessage());
             runningAnalysis.remove(task);
           }
@@ -145,15 +147,15 @@ public class AnalysisManager {
   /**
    * Initiates the analysis for a given URL.
    *
-   * @param url The URL of the repository to be analyzed.
    * @throws InterruptedException If the analysis is interrupted.
    */
-  public void analyze(String url) throws InterruptedException {
-    var id = UUID.randomUUID();
-    submittedAnalysisQueue.put(new Task(id, new Analyzer(parser, fileTypes, url, analysisPoolSize)));
+  public void analyze(Repository repository, Consumer<Tag> fct) throws InterruptedException {
+    submittedAnalysisQueue.put(new Task(repository.getId(), new Analyzer(parser, fileTypes, analysisPoolSize, false, repository, fct)));
   }
   
-  public void update(UUID repositoryId) throws InterruptedException {
+  
+  
+  /*public void update(UUID repositoryId) throws InterruptedException {
     var id = UUID.randomUUID();
     daoManager.repository()
               .get(repositoryId)
@@ -166,7 +168,7 @@ public class AnalysisManager {
                   }
                 });
               });
-  }
+  }*/
   
   /**
    * Cancels a specific analysis task based on its ID.
@@ -174,19 +176,19 @@ public class AnalysisManager {
    * @param taskId The ID of the task to be canceled.
    * @return True if the task was successfully canceled, otherwise false.
    */
-  public Single<Boolean> cancel(UUID taskId) {
+  public Boolean cancel(UUID taskId) {
     var analysis = runningAnalysis.entrySet()
                                   .stream()
                                   .filter(entry -> entry.getKey().id.equals(taskId))
                                   .findAny();
     if (analysis.isEmpty()) {
-      return Single.just(false);
+      return false;
     }
     var entry = analysis.orElseThrow();
     var task = entry.getKey();
     task.setStatus(Task.Status.CANCELED);
     task.analyzer.cancel();
-    return Single.just(true);
+    return true;
   }
   
   /**
@@ -194,7 +196,7 @@ public class AnalysisManager {
    *
    * @return List of Task objects representing the states.
    */
-  public List<Task> getStates() {
+  public List<Task> getStatus() {
     return Stream.concat(runningAnalysis.keySet().stream()
         , submittedAnalysisQueue.stream()).toList();
   }
@@ -208,9 +210,19 @@ public class AnalysisManager {
   
    */
   
-  public Repository downloadRepo(String url) {
-    // analyzer.downloadAnd get Info
-    // return repo
-    
+  public Repository downloadRepo(String url) throws IOException {
+    Pattern pattern = Pattern.compile(".*/(?<userName>.*)/(?<repositoryName>.*?)(\\.git)?");
+    var matcher = pattern.matcher(url);
+    if (matcher.matches()) {
+      var repositoryName = matcher.group("repositoryName");
+      var localRepositoryPath = ".gitclout-data/repositories/" + matcher.group("userName") + "-" + repositoryName;
+      // download
+      var file = new File(localRepositoryPath);
+      if (file.exists()) {
+        throw new IllegalArgumentException("The repository already exists");
+      }
+      return new Repository(repositoryName, url, localRepositoryPath, null);
+    }
+    throw new IllegalArgumentException("bad formated git repository url");
   }
 }

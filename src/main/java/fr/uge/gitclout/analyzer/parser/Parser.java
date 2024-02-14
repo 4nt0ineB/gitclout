@@ -21,7 +21,7 @@ public class Parser {
    * @return A HashMap containing line numbers and extracted information based on the FileType rules.
    * @throws IOException If an I/O error occurs while reading the InputStream.
    */
-  public HashMap<Integer, String> parseInputStreamWith(InputStream inputStream, FileType fileType) throws IOException {
+  public static HashMap<Integer, String> parseInputStreamWith(InputStream inputStream, FileType fileType) throws IOException {
     var extractions = new HashMap<Integer, String>();
     try (var reader = new BufferedReader(new InputStreamReader(inputStream))) {
       var filetype = fileType.name();

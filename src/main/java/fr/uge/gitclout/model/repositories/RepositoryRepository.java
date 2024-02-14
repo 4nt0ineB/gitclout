@@ -7,6 +7,6 @@ import org.springframework.data.repository.ListCrudRepository;
 import java.util.UUID;
 
 @org.springframework.stereotype.Repository
-public interface RepositoryRepository extends ListCrudRepository<Repository, UUID> {
+public interface RepositoryRepository extends JpaRepository<Repository, UUID> {
   Repository findTopByOrderByIdDesc();
 }

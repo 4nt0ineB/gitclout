@@ -5,6 +5,9 @@ import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import fr.uge.gitclout.analyzer.parser.FileTypes;
 import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -14,6 +17,9 @@ import java.util.stream.Collectors;
 
 @Table(name="tag_contribution")
 @Entity
+@Getter
+@Setter
+@AllArgsConstructor
 public class Contribution {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)

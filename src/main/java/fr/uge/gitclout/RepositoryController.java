@@ -1,5 +1,6 @@
 package fr.uge.gitclout;
 
+import fr.uge.gitclout.analyzer.parser.AnalysisManager;
 import fr.uge.gitclout.model.Repository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
@@ -7,6 +8,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.List;
@@ -37,7 +39,7 @@ class RepositoryController {
   
   @ResponseStatus(HttpStatus.CREATED)
   @PostMapping("")
-  Repository.LightRepository create(@RequestBody String url)  {
+  Repository.LightRepository create(@RequestBody String url) throws IOException {
     if(url == null || url.isBlank()) {
       return null;
     }
@@ -48,6 +50,12 @@ class RepositoryController {
   @DeleteMapping("/{id}")
   void delete(@PathVariable UUID id) {
     repository.deleteById(id);
+  }
+  
+  
+  @GetMapping("/analysis/status")
+  ResponseEntity<List<AnalysisManager.Task>> getAnalysisStatus() {
+    return ResponseEntity.ok(repository.getStatus());
   }
   
 }
