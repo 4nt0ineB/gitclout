@@ -1,5 +1,6 @@
 package fr.uge.gitclout;
 
+import fr.uge.gitclout.analyzer.parser.AnalysisManager;
 import fr.uge.gitclout.model.Repository;
 import fr.uge.gitclout.model.repositories.RepositoryRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,9 +15,12 @@ public class RepositoryService {
   
   @Autowired
   private final RepositoryRepository repository;
+  @Autowired
+  private final AnalysisManager analysisManager;
   
-  public RepositoryService(final RepositoryRepository repository){
+  public RepositoryService(final RepositoryRepository repository, AnalysisManager analysisManager){
     this.repository = repository;
+    this.analysisManager = analysisManager;
   }
   
   public List<Repository.LightRepository> findAll(){
@@ -47,7 +51,7 @@ public class RepositoryService {
   }
   
   public Repository.LightRepository fetchAndAnalyse(String repositoryUrl) {
-    // analysis manager ...
+    
     return null;
   }
   
