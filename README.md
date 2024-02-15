@@ -26,12 +26,12 @@ OPEN API http://localhost:8080/openapi/ui
 You can override some default properties with inline options at app start
 
 
-| Name                         | Type    | default         | comment                                                                                                                           |
-|------------------------------|---------|-----------------|-----------------------------------------------------------------------------------------------------------------------------------|
-| --server.port                | integer | 8080            |                                                                                                                                   |
-| --app.analysisPoolSize       | integer | 2               |                                                                                                                              
-| --app.analysisThreadPoolSize | integer | 3               |                                                                                                                                   |
-| --app.data                   | path    | .gitclout-data/ | A directory, containing the app’s data, cloned repositories and database, <br> is created at the current working directory's root |
+| Name                          | default         | comment                                                                                                                           |
+|-------------------------------|-----------------|-----------------------------------------------------------------------------------------------------------------------------------|
+| --server.port                 | 8080            |                                                                                                                                   |
+| --app.analysisPoolSize        | 2               |                                                                                                                              
+| --app.analysisThreadPoolSize  | 3               |                                                                                                                                   |
+| --app.data                    | .gitclout-data/ | A directory, containing the app’s data, cloned repositories and database, <br> is created at the current working directory's root |
 
 
 
