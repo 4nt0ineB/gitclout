@@ -4,14 +4,18 @@ import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
+import fr.uge.gitclout.analyzer.parser.FileTypes;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
+import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
+import java.util.logging.Logger;
+import java.util.stream.Collectors;
 
 
 @Table(name="tag")
@@ -22,10 +26,10 @@ import java.util.UUID;
 public class Tag {
   
   @Id
-  @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
   @JsonProperty("tagId")
-  String tagId;
+  String tagSha1Id;
+  @JsonIgnore
   UUID repositoryId;
   @JsonProperty
   int commitTime;
@@ -33,46 +37,41 @@ public class Tag {
   String parentId;
   @JsonInclude(JsonInclude.Include.NON_NULL)
   String name;
-  @JsonIgnore
+  @Getter
   @OneToMany(mappedBy = "tagId", cascade = CascadeType.ALL, orphanRemoval = true, fetch= FetchType.LAZY)
   @MapKey(name = "username")
-  Map<String, Contribution> contributions;
+  Map<String, Contribution> contributions = new HashMap<>();
   
   public static final String TAG_NAME_SEPARATOR = "\n";
   
   public Tag(){}
   
   public UUID id(){return id;}
-  public String tagId(){return tagId;}
+  public String tagId(){return tagSha1Id;}
   public String name(){return name;}
   public String parentId(){return parentId;}
   public UUID repositoryId(){return repositoryId;}
   public int commitTime(){return commitTime;}
   
-  public Map<String, Contribution> getContributions() {
-    return contributions;
-  }
-  
-  public Tag(String tagId, long repositoryId, String parentId, String name) {
+  public Tag(String tagId, UUID repositoryId, int commitTime, String parentId, String name) {
+    this.tagSha1Id = tagId;
+    this.repositoryId = repositoryId;
+    this.commitTime = commitTime;
+    this.parentId = parentId;
+    this.name = name;
     Objects.requireNonNull(name, "name can't be null");
   }
   
-  /*public Tag withName(String name){
-    Objects.requireNonNull(name);
-    return new Tag(id, repositoryId, commitTime, parentId, name, contributions);
-  }
   
-  public Tag withParent(Optional<String> parentId){
-    return new Tag(id, repositoryId, commitTime, parentId.orElse(null), name, contributions);
-  }
-  
-  class ComputedTag{
+  public class ComputedTag{
     
-    @JsonIgnore
+    private final FileTypes fileTypes;
+    
     private final ComputedTag parent;
     
-    public ComputedTag(ComputedTag parent){
+    public ComputedTag(ComputedTag parent, FileTypes fileTypes){
       this.parent = parent;
+      this.fileTypes = fileTypes;
     }
     
     @JsonGetter
@@ -86,16 +85,15 @@ public class Tag {
     
     @JsonProperty("parent")
     public String parent(){
-      return parent == null ? null : parent.reference().id();
+      return parent == null ? null : parent.reference().getTagSha1Id();
     }
     
     @JsonGetter
-    @JsonInclude(JsonInclude.Include.NON_EMPTY)
     public Map<String, Map<String, Map<String, Integer>>> contributions(){
-      return reference().contributions().entrySet().stream()
+      return reference().getContributions().entrySet().stream()
                          .collect(Collectors.toMap(Map.Entry::getKey,
-                             e -> e == null ? null : e.getValue().organized()));
+                             e -> e == null ? null : e.getValue().organized(fileTypes)));
     }
-  }*/
+  }
   
 }

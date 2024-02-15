@@ -2,6 +2,7 @@ package fr.uge.gitclout.model;
 
 import com.fasterxml.jackson.annotation.*;
 
+import fr.uge.gitclout.analyzer.parser.FileTypes;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -29,7 +30,7 @@ public class Repository {
   private String head;
   private Status status;
   @JsonIgnore
-  @OneToMany(targetEntity= Tag.class, cascade=CascadeType.REMOVE, mappedBy="repositoryId", fetch= FetchType.LAZY)
+  @OneToMany(targetEntity=Tag.class, cascade=CascadeType.REMOVE, mappedBy="repositoryId", fetch= FetchType.LAZY)
   private final List<Tag> tags = new ArrayList<>();
   
   public Repository() {}
@@ -38,7 +39,6 @@ public class Repository {
     Objects.requireNonNull(name, "The name can't be null");
     Objects.requireNonNull(url, "The url can't be null");
     Objects.requireNonNull(path, "The path can't be null");
-    Objects.requireNonNull(head, "The head can't be null");
     this.name = name;
     this.url = url;
     this.path = path;
@@ -49,7 +49,7 @@ public class Repository {
   public record LightTag(UUID id, List<String> names){}
   public record LightRepository(UUID id, String user, String name, String url, List<LightTag> tags, Status status) {}
   
- /* @JsonGetter
+ @JsonGetter
   @JsonProperty("tagsOrder")
   public List<String> tagsOrder(){
     return tags.stream()
@@ -66,34 +66,31 @@ public class Repository {
                  o.addAll(o2);
                  return o;
                }));
-  }*/
-  /*
-  @JsonGetter
-  @JsonInclude(JsonInclude.Include.NON_EMPTY)
-  @JsonProperty("tags")
-  public Map<String, ComputedTag> tagsDetail(){
+  }
+  
+  public Map<String, Tag.ComputedTag> tagsDetail(FileTypes fileTypes){
     var tagBySha1 = tagBySha1();
-    var computedTagsBySha1 = new HashMap<String, ComputedTag>();
+    var computedTagsBySha1 = new HashMap<String, Tag.ComputedTag>();
     var firsts = tagBySha1.get("null");
     if(firsts == null){
       return computedTagsBySha1;
     }
     var toVisit = new ArrayDeque<>(firsts);
     for(var first: firsts){
-      computedTagsBySha1.put(first.tagId, first.new ComputedTag(null));
+      computedTagsBySha1.put(first.tagSha1Id, first.new ComputedTag(null, fileTypes));
     }
     while(!toVisit.isEmpty()){
       var parent = toVisit.poll();
-      var children = tagBySha1.get(parent.tagId);
+      var children = tagBySha1.get(parent.tagSha1Id);
       if(children != null){
         for(var child: children){
-          computedTagsBySha1.put(child.tagId(), child.new ComputedTag(computedTagsBySha1.get(child.parentId())));
+          computedTagsBySha1.put(child.tagId(), child.new ComputedTag(computedTagsBySha1.get(child.parentId()), fileTypes));
         }
         toVisit.addAll(children.reversed());
       }
     }
     return computedTagsBySha1;
-  }*/
+  }
   
   public Repository withTags(List<Tag> tags){
     Objects.requireNonNull(tags);
@@ -104,5 +101,4 @@ public class Repository {
   public String toString() {
     return "[" + name + "]";
   }
-
 }

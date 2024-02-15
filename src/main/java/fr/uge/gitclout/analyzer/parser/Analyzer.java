@@ -27,6 +27,7 @@ import java.util.concurrent.Future;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
+import java.util.logging.Logger;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
@@ -35,6 +36,7 @@ import static java.util.stream.Collectors.*;
 
 
 public class Analyzer {
+  private static final Logger logger = Logger.getLogger(Analyzer.class.getName());
   // ---------------
   // Internal Representation
   // ---------------
@@ -138,13 +140,18 @@ public class Analyzer {
    * @return A RepositoryModel object representing the analyzed repository.
    * @throws IOException     If the analysis fails.
    */
-  public Repository analyze(fr.uge.gitclout.model.Repository repository) throws IOException {
+  public Repository analyze() throws IOException {
     /*setUrl(url);
     if (isUpdate) {
       return updateRepository(repositoryModel);
     }*/
     var file = new File(repository.getPath());
-    try (var gitRepo = Git.open(file)) {
+    if (file.exists()) {
+      throw new IllegalStateException("The repository already exists");
+    }
+    try (var gitRepo = Git.cloneRepository().setURI(repository.getUrl())
+                          .setBare(true)
+                          .setDirectory(file).call()) {
       git = gitRepo;
       runAnalysis(null);
     } catch (GitAPIException e) {
@@ -218,7 +225,6 @@ public class Analyzer {
       tagBySha1 = buildTagMap(mapped);
       processTagDetails(tagBySha1, computedTags, computedTagsFromOld, toVisit);
     }
-    computedTags.values().stream().forEach(fct);
     return null;
   }
   
@@ -277,11 +283,13 @@ public class Analyzer {
           }
         }
       }
-      var tag = new Tag(current.commit.getName(), commitTime, parentId, names);
+      var tag = new Tag(UUID.randomUUID(), current.commit.getName(), repository.getId(), commitTime, parentId, names, new HashMap<>());
       var mappedContributions = contributions.entrySet().stream()
                                              .collect(toMap(Map.Entry::getKey,
-                                                 entry -> new Contribution(null, tag.tagId(), entry.getKey(), entry.getValue())));
+                                                 entry -> new Contribution(null, tag.id(), entry.getKey(), entry.getValue())));
       tag.getContributions().putAll(mappedContributions);
+      logger.info("New tag " + tag.getTagSha1Id() + ", " + tag.repositoryId());
+      fct.accept(tag);
       computedTags.put(current.commit.getName(), tag);
       var children = tagBySha1.get(current.commit.getName());
       if (children != null) {

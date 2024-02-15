@@ -1,6 +1,7 @@
 package fr.uge.gitclout.analyzer.parser;
 
 import fr.uge.gitclout.model.FileType;
+import org.springframework.stereotype.Component;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -11,6 +12,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.IntStream;
 
+@Component
 public class Parser {
   
   /**

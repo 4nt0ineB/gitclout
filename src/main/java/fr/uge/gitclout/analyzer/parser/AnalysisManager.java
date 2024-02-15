@@ -8,6 +8,7 @@ import fr.uge.gitclout.model.Tag;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -28,18 +29,24 @@ import java.util.stream.Stream;
  * It manages the submission, execution, and cancellation of analysis tasks.
  */
 
+@Service
 public class AnalysisManager {
+  private final Logger LOGGER = Logger.getLogger(AnalysisManager.class.getName());
   
-  // dependencies
+  @Autowired
   private final FileTypes fileTypes;
+  @Autowired
   private final Parser parser;
-  private final int concurrentAnalysis;
-  private final int analysisPoolSize;
+  @Value("${app.concurrentAnalysis}")
+  private int concurrentAnalysis;
+  @Value("${app.analysisPoolSize}")
+  private int analysisPoolSize;
+  @Value("${app.data}")
+  private String gitRepositoryRootPath;
+  
   // managing tasks and results
   private final LinkedBlockingQueue<Task> submittedAnalysisQueue = new LinkedBlockingQueue<>();
   private final ConcurrentHashMap<Task, Thread> runningAnalysis = new ConcurrentHashMap<>();
-  //
-  private final Logger LOGGER = Logger.getLogger(AnalysisManager.class.getName());
   
   
   /**
@@ -48,13 +55,11 @@ public class AnalysisManager {
    * @param parser     The parser used for analysis.
    * @param fileTypes  The file types manager.
    */
-  public AnalysisManager(Parser parser, FileTypes fileTypes, int concurrentAnalysis, int analysisPoolSize) {
+  public AnalysisManager(Parser parser, FileTypes fileTypes) {
     Objects.requireNonNull(parser);
     Objects.requireNonNull(fileTypes);
     this.parser = parser;
     this.fileTypes = fileTypes;
-    this.concurrentAnalysis = concurrentAnalysis;
-    this.analysisPoolSize = analysisPoolSize;
     startAnalysisPool();
   }
   
@@ -84,7 +89,7 @@ public class AnalysisManager {
     
     @JsonGetter
     public String status() {
-      return STR."\{analyzer.isUpdate() ? "Update - " : ""}\{status.toString().toLowerCase(Locale.ENGLISH)}";
+      return analyzer.isUpdate() ? "Update - " : status.toString().toLowerCase(Locale.ENGLISH);
     }
     
     @JsonGetter
@@ -121,11 +126,12 @@ public class AnalysisManager {
           } catch (InterruptedException e) {
             continue;
           }
+          LOGGER.info("Take task " + task.id);
           try {
             runningAnalysis.put(task, Thread.currentThread());
             task.setStatus(Task.Status.RUNNING);
-            /*var repo = task.analyzer.analyze();
-            if(task.analyzer.isUpdate()){
+            var repo = task.analyzer.analyze();
+            /*if(task.analyzer.isUpdate()){
               daoManager.repository().delete(repo).subscribe(unused -> {
                 daoManager.repository().save(repo).subscribe(no -> {});
               });
@@ -150,6 +156,7 @@ public class AnalysisManager {
    * @throws InterruptedException If the analysis is interrupted.
    */
   public void analyze(Repository repository, Consumer<Tag> fct) throws InterruptedException {
+    LOGGER.info("Analysis request, Task refering repository id:"+ repository.getId() + " was put in queue");
     submittedAnalysisQueue.put(new Task(repository.getId(), new Analyzer(parser, fileTypes, analysisPoolSize, false, repository, fct)));
   }
   
@@ -215,7 +222,7 @@ public class AnalysisManager {
     var matcher = pattern.matcher(url);
     if (matcher.matches()) {
       var repositoryName = matcher.group("repositoryName");
-      var localRepositoryPath = ".gitclout-data/repositories/" + matcher.group("userName") + "-" + repositoryName;
+      var localRepositoryPath = gitRepositoryRootPath + "/repositories/" + matcher.group("userName") + "-" + repositoryName;
       // download
       var file = new File(localRepositoryPath);
       if (file.exists()) {
@@ -223,6 +230,6 @@ public class AnalysisManager {
       }
       return new Repository(repositoryName, url, localRepositoryPath, null);
     }
-    throw new IllegalArgumentException("bad formated git repository url");
+    throw new IllegalArgumentException("bad formatted git repository url");
   }
 }

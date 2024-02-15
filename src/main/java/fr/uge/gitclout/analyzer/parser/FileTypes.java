@@ -3,6 +3,7 @@ package fr.uge.gitclout.analyzer.parser;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.uge.gitclout.model.FileType;
+import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.*;
@@ -14,11 +15,16 @@ import java.util.function.BiConsumer;
  */
 public class FileTypes {
   
-  private final Map<String, FileType> types;
+  private final Map<String, FileType> types = new HashMap<>();
   
-  public FileTypes(Map<String, FileType> languagesExtractions) {
-    this.types = languagesExtractions;
+  public FileTypes() {
+  
   }
+  
+  private FileTypes(Map<String, FileType> languagesExtractions) {
+    this.types .putAll(languagesExtractions);
+  }
+  
   
   
   public Map<String, FileType> types(){
