@@ -7,7 +7,7 @@ The back-end uses Java with Spring Boot v3 (Spring Framework 6) with WebMVC to s
 
 The front-end uses angular 16 and tailwind.
 
-***This GitClout app is an ongoing re-implementation of the original [GitClout app](https://gitlab.com/4nt0ineB/sebbah-bastos) developped by [val.sebb](https://gitlab.com/val.sebb) and me,***
+***On going re-implementation of the original [GitClout app](https://gitlab.com/4nt0ineB/sebbah-bastos) developped by [val.sebb](https://gitlab.com/val.sebb) and me,***
 using different back-end and front-end frameworks.
 
 ### Run the app
