@@ -1,4 +1,4 @@
-package fr.uge.gitclout.analyzer.parser;
+package fr.uge.gitclout.analyzer;
 
 import fr.uge.gitclout.model.FileType;
 import org.springframework.stereotype.Component;

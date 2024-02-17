@@ -1,15 +1,11 @@
-package fr.uge.gitclout.analyzer.parser;
+package fr.uge.gitclout.analyzer;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonValue;
-import fr.uge.gitclout.RepositoryService;
-import fr.uge.gitclout.model.Repository;
-import fr.uge.gitclout.model.Tag;
-import org.eclipse.jgit.api.Git;
-import org.eclipse.jgit.api.errors.GitAPIException;
-import org.springframework.beans.factory.annotation.Autowired;
+import fr.uge.gitclout.model.entity.Repository;
+import fr.uge.gitclout.model.entity.Tag;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.stereotype.Service;
 
 import java.io.File;
 import java.io.IOException;
@@ -29,18 +25,14 @@ import java.util.stream.Stream;
  * It manages the submission, execution, and cancellation of analysis tasks.
  */
 
-@Service
 public class AnalysisManager {
   private final Logger LOGGER = Logger.getLogger(AnalysisManager.class.getName());
   
-  @Autowired
+
   private final FileTypes fileTypes;
-  @Autowired
   private final Parser parser;
-  @Value("${app.concurrentAnalysis}")
-  private int concurrentAnalysis;
-  @Value("${app.analysisPoolSize}")
-  private int analysisPoolSize;
+  private final int concurrentAnalysis;
+  private final int analysisPoolSize;
   @Value("${app.data}")
   private String gitRepositoryRootPath;
   
@@ -55,20 +47,33 @@ public class AnalysisManager {
    * @param parser     The parser used for analysis.
    * @param fileTypes  The file types manager.
    */
-  public AnalysisManager(Parser parser, FileTypes fileTypes) {
-    Objects.requireNonNull(parser);
+  public AnalysisManager(Parser parser, FileTypes fileTypes, int concurrentAnalysis, int analysisPoolSize) {
+    this.concurrentAnalysis = concurrentAnalysis;
+    this.analysisPoolSize = analysisPoolSize;
     Objects.requireNonNull(fileTypes);
     this.parser = parser;
     this.fileTypes = fileTypes;
     startAnalysisPool();
   }
   
+  
+  public record Status (
+      @JsonIgnore
+      UUID statusId,
+      Task.Status status,
+      int totalTags,
+      int analyzedTags
+  ) {
+  }
+  
   /**
    * Represents an analysis' task.
    */
+  
+  
   public static class Task {
     public enum Status {
-      QUEUED, RUNNING, CANCELED;
+      QUEUED, RUNNING, CANCELED, DONE;
       
       @JsonValue
       String value() {
@@ -76,7 +81,6 @@ public class AnalysisManager {
                     .toLowerCase(Locale.ENGLISH);
       }
     }
-    
     private final UUID id;
     private final Analyzer analyzer;
     private Status status;
@@ -107,8 +111,13 @@ public class AnalysisManager {
       return analyzer.analyzedTags();
     }
     
-    private void setStatus(Status status) {
+    private Task setStatus(Status status) {
       this.status = status;
+      return this;
+    }
+    
+    public AnalysisManager.Status toStatus(){
+      return new AnalysisManager.Status(id, status, totalTags(), analyzedTags());
     }
   }
   
@@ -126,10 +135,10 @@ public class AnalysisManager {
           } catch (InterruptedException e) {
             continue;
           }
-          LOGGER.info("Take task " + task.id);
           try {
             runningAnalysis.put(task, Thread.currentThread());
             task.setStatus(Task.Status.RUNNING);
+            LOGGER.info("Starting analysis Task :" + task.id);
             var repo = task.analyzer.analyze();
             /*if(task.analyzer.isUpdate()){
               daoManager.repository().delete(repo).subscribe(unused -> {
@@ -156,7 +165,7 @@ public class AnalysisManager {
    * @throws InterruptedException If the analysis is interrupted.
    */
   public void analyze(Repository repository, Consumer<Tag> fct) throws InterruptedException {
-    LOGGER.info("Analysis request, Task refering repository id:"+ repository.getId() + " was put in queue");
+    LOGGER.info("Analysis request, Task refering repository id:"+ repository.getId() + " put in queue");
     submittedAnalysisQueue.put(new Task(repository.getId(), new Analyzer(parser, fileTypes, analysisPoolSize, false, repository, fct)));
   }
   
@@ -203,21 +212,12 @@ public class AnalysisManager {
    *
    * @return List of Task objects representing the states.
    */
-  public List<Task> getStatus() {
+  public List<Status> getStatus() {
     return Stream.concat(runningAnalysis.keySet().stream()
-        , submittedAnalysisQueue.stream()).toList();
+        , submittedAnalysisQueue.stream()).map(Task::toStatus).toList();
   }
   
-  /*
-  
-    analyzer.analyze(
-      repo,
-      (tag) -> analyzedTagQueue.add(tag)
-    )
-  
-   */
-  
-  public Repository downloadRepo(String url) throws IOException {
+  public Repository extractRepoInfo(String url) throws IOException {
     Pattern pattern = Pattern.compile(".*/(?<userName>.*)/(?<repositoryName>.*?)(\\.git)?");
     var matcher = pattern.matcher(url);
     if (matcher.matches()) {
@@ -231,5 +231,10 @@ public class AnalysisManager {
       return new Repository(repositoryName, url, localRepositoryPath, null);
     }
     throw new IllegalArgumentException("bad formatted git repository url");
+  }
+  
+  public Status fullFromRepository(Repository repository) {
+    var tagsNumber = repository.getTags().size();
+    return new Status(repository.getId(), Task.Status.DONE, tagsNumber, tagsNumber);
   }
 }

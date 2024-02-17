@@ -1,9 +1,8 @@
-package fr.uge.gitclout.analyzer.parser;
+package fr.uge.gitclout.analyzer;
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import fr.uge.gitclout.model.FileType;
-import org.springframework.stereotype.Component;
 
 import java.io.IOException;
 import java.util.*;

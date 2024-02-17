@@ -1,14 +1,10 @@
-package fr.uge.gitclout.model;
+package fr.uge.gitclout.model.entity;
 
-import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonInclude;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import fr.uge.gitclout.analyzer.parser.FileTypes;
+import fr.uge.gitclout.analyzer.FileTypes;
 import jakarta.persistence.*;
 import lombok.Getter;
 import lombok.Setter;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.annotation.Lazy;
 
 import java.util.HashMap;
 import java.util.Map;

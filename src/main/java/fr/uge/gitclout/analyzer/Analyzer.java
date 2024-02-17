@@ -1,8 +1,7 @@
-package fr.uge.gitclout.analyzer.parser;
+package fr.uge.gitclout.analyzer;
 
-import fr.uge.gitclout.Utils;
-import fr.uge.gitclout.model.Contribution;
-import fr.uge.gitclout.model.Tag;
+import fr.uge.gitclout.model.entity.Contribution;
+import fr.uge.gitclout.model.entity.Tag;
 import org.eclipse.jgit.api.Git;
 import org.eclipse.jgit.api.errors.GitAPIException;
 import org.eclipse.jgit.blame.BlameResult;
@@ -12,7 +11,6 @@ import org.eclipse.jgit.lib.Ref;
 import org.eclipse.jgit.lib.Repository;
 import org.eclipse.jgit.revwalk.RevCommit;
 import org.eclipse.jgit.revwalk.RevWalk;
-import org.eclipse.jgit.transport.FetchResult;
 import org.eclipse.jgit.treewalk.AbstractTreeIterator;
 import org.eclipse.jgit.treewalk.CanonicalTreeParser;
 import org.eclipse.jgit.treewalk.EmptyTreeIterator;
@@ -28,7 +26,6 @@ import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.concurrent.atomic.AtomicInteger;
 import java.util.function.Consumer;
 import java.util.logging.Logger;
-import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 import static java.util.stream.Collectors.*;
@@ -65,7 +62,7 @@ public class Analyzer {
   // ---------------
   // Repository Handling
   // ---------------
-  private final fr.uge.gitclout.model.Repository repository;
+  private final fr.uge.gitclout.model.entity.Repository repository;
   private Repository gitRepository;
   private Git git;
   private Map<RevCommit, Set<Ref>> tagsOfCommits;
@@ -78,7 +75,7 @@ public class Analyzer {
   private final AtomicBoolean isCanceled = new AtomicBoolean(false);
   
   
-  public Analyzer(Parser parser, FileTypes fileTypes, int analysisPoolSize, boolean isUpdate, fr.uge.gitclout.model.Repository repository,  Consumer<Tag> fct) {
+  public Analyzer(Parser parser, FileTypes fileTypes, int analysisPoolSize, boolean isUpdate, fr.uge.gitclout.model.entity.Repository repository, Consumer<Tag> fct) {
     Objects.requireNonNull(parser);
     Objects.requireNonNull(fileTypes);
     Objects.requireNonNull(repository);
@@ -288,7 +285,7 @@ public class Analyzer {
                                              .collect(toMap(Map.Entry::getKey,
                                                  entry -> new Contribution(null, tag.id(), entry.getKey(), entry.getValue())));
       tag.getContributions().putAll(mappedContributions);
-      logger.info("New tag " + tag.getTagSha1Id() + ", " + tag.repositoryId());
+      logger.info("New tag " + tag.getTagSha1Id()+ "("+ tag.getName() + ") of repo " + tag.repositoryId());
       fct.accept(tag);
       computedTags.put(current.commit.getName(), tag);
       var children = tagBySha1.get(current.commit.getName());
@@ -493,8 +490,8 @@ public class Analyzer {
       switch (future.state()) {
         case RUNNING -> throw new AssertionError("should not be there");
         case SUCCESS -> contributions.add(future.resultNow());
-        case FAILED -> System.out.println(future.exceptionNow());
-        case CANCELLED -> System.out.println("cancelled");
+        case FAILED -> logger.severe(future.exceptionNow().getMessage());
+        case CANCELLED -> logger.warning("cancelled");
       }
     }
     executorService.shutdown();

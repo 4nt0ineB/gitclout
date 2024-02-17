@@ -1,7 +1,6 @@
-package fr.uge.gitclout.model.repositories;
+package fr.uge.gitclout.model.repository;
 
-import fr.uge.gitclout.model.Repository;
-import fr.uge.gitclout.model.Tag;
+import fr.uge.gitclout.model.entity.Tag;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.UUID;

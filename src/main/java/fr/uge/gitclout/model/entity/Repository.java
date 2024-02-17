@@ -1,14 +1,17 @@
-package fr.uge.gitclout.model;
+package fr.uge.gitclout.model.entity;
 
 import com.fasterxml.jackson.annotation.*;
 
-import fr.uge.gitclout.analyzer.parser.FileTypes;
+import fr.uge.gitclout.analyzer.FileTypes;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
 
 import java.util.*;
+import java.util.function.Function;
+import java.util.stream.Collectors;
+
 import static java.util.stream.Collectors.toMap;
 
 @Entity
@@ -16,10 +19,6 @@ import static java.util.stream.Collectors.toMap;
 @Setter
 @AllArgsConstructor
 public class Repository {
-  public enum Status {
-    ANALYZED, IN_ANALYSIS, UPDATING;
-  }
-  
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
@@ -28,7 +27,6 @@ public class Repository {
   private String url;
   private @JsonIgnore String path;
   private String head;
-  private Status status;
   @JsonIgnore
   @OneToMany(targetEntity=Tag.class, cascade=CascadeType.REMOVE, mappedBy="repositoryId", fetch= FetchType.LAZY)
   private final List<Tag> tags = new ArrayList<>();
@@ -46,8 +44,6 @@ public class Repository {
   }
   
   
-  public record LightTag(UUID id, List<String> names){}
-  public record LightRepository(UUID id, String user, String name, String url, List<LightTag> tags, Status status) {}
   
  @JsonGetter
   @JsonProperty("tagsOrder")
@@ -58,7 +54,7 @@ public class Repository {
                .toList();
   }
   
-  private Map<String, ArrayList<Tag>> tagBySha1(){
+  private Map<String, ArrayList<Tag>> childrenTags(){
     return tags.stream()
                .collect(toMap(t -> Objects.toString(t.parentId()),
                    v -> new ArrayList<>(List.of(v)),
@@ -68,8 +64,10 @@ public class Repository {
                }));
   }
   
+  
+  
   public Map<String, Tag.ComputedTag> tagsDetail(FileTypes fileTypes){
-    var tagBySha1 = tagBySha1();
+    var tagBySha1 = childrenTags();
     var computedTagsBySha1 = new HashMap<String, Tag.ComputedTag>();
     var firsts = tagBySha1.get("null");
     if(firsts == null){

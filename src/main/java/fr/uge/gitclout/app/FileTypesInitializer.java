@@ -1,6 +1,7 @@
-package fr.uge.gitclout;
+package fr.uge.gitclout.app;
 
-import fr.uge.gitclout.analyzer.parser.FileTypes;
+import fr.uge.gitclout.analyzer.Utils;
+import fr.uge.gitclout.analyzer.FileTypes;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 

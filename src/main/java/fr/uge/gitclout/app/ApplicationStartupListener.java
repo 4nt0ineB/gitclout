@@ -1,4 +1,4 @@
-package fr.uge.gitclout;
+package fr.uge.gitclout.app;
 
 import org.springframework.boot.context.event.ApplicationReadyEvent;
 import org.springframework.context.ApplicationListener;

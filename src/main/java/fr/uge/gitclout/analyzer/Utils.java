@@ -1,4 +1,4 @@
-package fr.uge.gitclout;
+package fr.uge.gitclout.analyzer;
 
 
 import java.io.IOException;

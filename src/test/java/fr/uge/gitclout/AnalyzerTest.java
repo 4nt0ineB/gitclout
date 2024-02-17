@@ -1,17 +1,6 @@
 package fr.uge.gitclout;
 
-import fr.uge.gitclout.analyzer.parser.AnalysisManager;
-import fr.uge.gitclout.analyzer.parser.FileTypes;
-import fr.uge.gitclout.analyzer.parser.Parser;
-import fr.uge.gitclout.model.Repository;
-import org.aspectj.lang.annotation.Before;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.boot.test.mock.mockito.MockBean;
-import org.springframework.context.annotation.Bean;
-import org.springframework.context.annotation.Configuration;
+import fr.uge.gitclout.analyzer.AnalysisManager;
 
 import java.io.IOException;
 
@@ -32,7 +21,7 @@ public class AnalyzerTest {
     var url = "https://github.com/username/repository.git";
     
     // When
-    var repository = manager.downloadRepo(url);
+    var repository = manager.extractRepoInfo(url);
     
     // Then
     assertNotNull(repository);
@@ -46,7 +35,7 @@ public class AnalyzerTest {
     var invalidUrl = "https://github.com/username";
     
     // When / Then
-    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> manager.downloadRepo(invalidUrl));
+    IllegalArgumentException exception = assertThrows(IllegalArgumentException.class, () -> manager.extractRepoInfo(invalidUrl));
     assertEquals("bad formatted git repository url", exception.getMessage());
   }
 }

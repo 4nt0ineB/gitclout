@@ -21,3 +21,18 @@ export interface RepositoryDetails {
   tagsOrder: string[];
 }
 
+
+
+/*
+
+interface TagContribution {
+  [category: string]: {
+    [subcategory: string]: number
+  };
+}
+
+interface Contributions {
+  [username: string]: TagContribution;
+}
+
+ */

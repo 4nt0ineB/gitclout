@@ -1,10 +1,10 @@
-package fr.uge.gitclout.model;
+package fr.uge.gitclout.model.entity;
 
 import com.fasterxml.jackson.annotation.JsonGetter;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import com.fasterxml.jackson.annotation.JsonProperty;
-import fr.uge.gitclout.analyzer.parser.FileTypes;
+import fr.uge.gitclout.analyzer.FileTypes;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -14,7 +14,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.UUID;
-import java.util.logging.Logger;
 import java.util.stream.Collectors;
 
 

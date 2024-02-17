@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import {HttpClient} from "@angular/common/http";
 import {Observable} from "rxjs";
-import {Repository} from "./model/homePageModels";
+import {LightRepository} from "./model/homePageModels";
 
 @Injectable({
   providedIn: 'root'
@@ -11,8 +11,8 @@ export class RepositoryService {
 
   constructor(private http: HttpClient) { }
 
-  getRepositories(): Observable<Repository[]> {
+  getRepositories(): Observable<LightRepository[]> {
     return this.http
-      .get<Repository[]>(`${this.api}`);
+      .get<LightRepository[]>(`${this.api}`);
   }
 }

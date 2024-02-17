@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {RepositoryService} from "../repository.service";
-import {Repository} from "../model/homePageModels";
+import {LightRepository} from "../model/homePageModels";
 import {ActivatedRoute} from "@angular/router";
 
 @Component({
@@ -9,58 +9,45 @@ import {ActivatedRoute} from "@angular/router";
   styleUrls: ['./home.component.css']
 })
 export class HomeComponent implements OnInit {
-  repositories: Repository[] = [
+  repositories: LightRepository[] = [
     {
-      "id": "e3d57419-3f4d-4deb-8c6b-cc130bfed638",
-      "name": "asm",
-      "url": "https://gitlab.ow2.org/asm/asm.git",
-      "head": "bde266f0d59dd12739ad15a39f1da43a61143eed",
+      "id": "ae87ce16-37c6-429e-8bfb-3933490788b5",
+      "username": "null",
+      "name": "Calimba",
+      "tagsOrder": ["e374d1ebfd71d9526e5d6e345762e48b0cb22f4e",
+      "3f6809711c6418c5f5163900c40710178db65ccb",
+      "aae650a9d5a9cbd69bf211f34bc4ced13d2ab9f8"
+    ],
+      "url": "https://github.com/SamueleGiraudo/Calimba.git",
       "tags": {
-        "8b56cad44ffb6809306ef3f0051b7495f8ae267b": {
-          "name": [
-            "v1",
-            "v2"
-          ],
-          "parent": null
+        "e374d1ebfd71d9526e5d6e345762e48b0cb22f4e": {
+          "id": "003b5409-859c-45de-88a7-0257e1a434d4",
+          "sha1": "e374d1ebfd71d9526e5d6e345762e48b0cb22f4e",
+          "parentSha1": "3f6809711c6418c5f5163900c40710178db65ccb",
+          "names": [
+            "v0.1011"
+          ]
         },
-        "8b56cad44ffb6809306ef3f0051b7495f8ae569a": {
-          "name": [
-            "v3",
-            "v4"
-          ],
-          "parent": "8b56cad44ffb6809306ef3f0051b7495f8ae267b"
+        "3f6809711c6418c5f5163900c40710178db65ccb": {
+          "id": "a71bdb2c-1c62-4e86-a09e-a81ab7587474",
+          "sha1": "3f6809711c6418c5f5163900c40710178db65ccb",
+          "parentSha1": "aae650a9d5a9cbd69bf211f34bc4ced13d2ab9f8",
+          "names": [
+            "v0.1010"
+          ]
+        },
+        "aae650a9d5a9cbd69bf211f34bc4ced13d2ab9f8": {
+          "id": "0938364d-b06c-466b-be04-70de95a30d1b",
+          "sha1": "aae650a9d5a9cbd69bf211f34bc4ced13d2ab9f8",
+          "parentSha1": null,
+          "names": [
+            "v0.0011"
+          ]
         }
       },
-      "tagsOrder": [
-        "8b56cad44ffb6809306ef3f0051b7495f8ae267b",
-        "8b56cad44ffb6809306ef3f0051b7495f8ae569a"
-      ]
-    },
-    {
-      "id": "e3d57419-3f4d-4deb-8c6b-cc130bfed638",
-      "name": "asm",
-      "url": "https://gitlab.ow2.org/asm/asm.git",
-      "head": "bde266f0d59dd12739ad15a39f1da43a61143eed",
-      "tags": {
-        "8b56cad44ffb6809306ef3f0051b7495f8ae267b": {
-          "name": [
-            "v1",
-            "v2"
-          ],
-          "parent": null
-        },
-        "8b56cad44ffb6809306ef3f0051b7495f8ae569a": {
-          "name": [
-            "v3",
-            "v4"
-          ],
-          "parent": "8b56cad44ffb6809306ef3f0051b7495f8ae267b"
-        }
-      },
-      "tagsOrder": [
-        "8b56cad44ffb6809306ef3f0051b7495f8ae267b",
-        "8b56cad44ffb6809306ef3f0051b7495f8ae569a"
-      ]
+      "status": "done",
+      "totalTags": 3,
+      "analyzedTags": 3
     }
   ];
 
@@ -69,7 +56,7 @@ export class HomeComponent implements OnInit {
   }
 
   ngOnInit() {
-    this.repositoryService.getRepositories().subscribe((res: Repository[]) => {
+    this.repositoryService.getRepositories().subscribe((res: LightRepository[]) => {
       console.log(res);
     })
   }
