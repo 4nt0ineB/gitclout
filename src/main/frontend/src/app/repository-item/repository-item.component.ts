@@ -2,6 +2,7 @@ import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {LightRepository} from "../model/homePageModels";
 import {from, Observable} from 'rxjs';
 import { map } from 'rxjs/operators';
+import {Utils} from "../utils";
 
 @Component({
   selector: 'app-repository-item',
@@ -49,14 +50,5 @@ export class RepositoryItemComponent implements OnInit {
     }
   }
 
-  getColor(index: number): string {
-    const startColor = [135, 206, 235]; // RGB value for slightly darker pastel blue
-    const endColor = [152, 251, 152];   // RGB value for slightly darker pastel green
-
-    const r = Math.round(startColor[0] + (endColor[0] - startColor[0]) * index / (this.repository.tagsOrder.length - 1));
-    const g = Math.round(startColor[1] + (endColor[1] - startColor[1]) * index / (this.repository.tagsOrder.length - 1));
-    const b = Math.round(startColor[2] + (endColor[2] - startColor[2]) * index / (this.repository.tagsOrder.length - 1));
-
-    return `rgb(${r}, ${g}, ${b})`;
-  }
+  protected readonly Utils = Utils;
 }

@@ -9,11 +9,17 @@ interface Contributions {
 }
 
 export interface Tag {
+  id: string;
+  sha1: string;
   name: string[];
   contributions: {
     [contributor: string]: Contributions;
   };
   parent: string | null;
+}
+
+export interface Tags {
+  [tagId: string]: Tag;
 }
 
 export interface RepositoryDetails {
@@ -25,8 +31,6 @@ export interface RepositoryDetails {
   totalTags: number;
   head: string;
   analyzedTags: number
-  tags: {
-    [tagId: string]: Tag;
-  };
+  tags: Tags;
   tagsOrder: string[];
 }

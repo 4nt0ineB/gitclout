@@ -31,14 +31,11 @@
         </p>
         </a>
       </div>
-      <!--<p class="text-sm text-gray-600 mb-2">Status: {{ repository.status }}</p>
-      <p class="text-sm text-gray-600 mb-2">Total Tags: {{ repository.totalTags }}</p>
-      <p class="text-sm text-gray-600 mb-2">Analyzed Tags: {{ repository.analyzedTags }}</p>-->
       <br>
       <div class="flex flex-wrap justify-start">
         <ng-container *ngFor="let tagId of repository.tagsOrder; index as i; first as isFirst" style="padding: 1em;" >
           <a href="{{repository.id}}/tag/{{repository.tags[tagId].sha1}}" style="text-decoration: none; color: inherit;">
-            <div style="margin-right: 0.5em; background-color: {{ getColor(i) }};" class="mr-2 mb-1 rounded-sm p-0.5">
+            <div style="margin-right: 0.5em; background-color: {{ Utils.getColor(i, repository.tagsOrder.length) }};" class="mr-2 mb-1 rounded-lg p-1">
               {{repository.tags[tagId].names}}</div>
           </a>
         </ng-container>
