@@ -65,6 +65,7 @@ public class RepositoryService {
         repository.getName(),
         repository.getUrl(),
         tags,
+        repository.tagsOrder(),
         status
     );
   }
@@ -76,6 +77,17 @@ public class RepositoryService {
                               .orElseGet(() -> analysisManager.fullFromRepository(repository));
       return repositoryToRepositoryDetail(repository, status);
     });
+  }
+  
+  
+  
+  public Optional<AnalysisManager.Status> getStatus(UUID id) {
+    var repo = repoRepository.findById(id);
+    return repo.map(repository -> getStatus().stream()
+                   .filter(s -> s.statusId().equals(repository.getId()))
+                   .findFirst()
+                   .orElseGet(() -> analysisManager.fullFromRepository(repository))
+    );
   }
   
   public LightRepository fetchAndAnalyse(String repositoryUrl) throws IOException {
@@ -99,8 +111,13 @@ public class RepositoryService {
     return analysisManager.getStatus();
   }
   
-  public void deleteById(UUID id) {
-    repoRepository.deleteById(id);
+  public boolean deleteById(UUID id) {
+    var repo = findById(id);
+    return repo.map(repositoryDetail -> {
+      repoRepository.deleteById(id);
+      analysisManager.deleteLocalRepoDir(repositoryDetail.repository());
+      return true;
+    }).orElse(false);
   }
   
   

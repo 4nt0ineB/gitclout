@@ -1,5 +1,11 @@
+interface TagContribution {
+  [category: string]: {
+    [subcategory: string]: number
+  };
+}
+
 interface Contributions {
-  [typeContribution: string]: { [contribution: string]: number };
+  [username: string]: TagContribution;
 }
 
 export interface Tag {
@@ -12,27 +18,15 @@ export interface Tag {
 
 export interface RepositoryDetails {
   id: string;
+  username: string;
   name: string;
   url: string;
+  status: string;
+  totalTags: number;
   head: string;
+  analyzedTags: number
   tags: {
     [tagId: string]: Tag;
   };
   tagsOrder: string[];
 }
-
-
-
-/*
-
-interface TagContribution {
-  [category: string]: {
-    [subcategory: string]: number
-  };
-}
-
-interface Contributions {
-  [username: string]: TagContribution;
-}
-
- */

@@ -1,6 +1,6 @@
 #repoAddressField {
   border: #ffffff hidden;
-  border-bottom: 1px solid black;
+  border-bottom: 1px solid lightgrey;
 }
 #repoAddressField:focus {
   border-color: #667EEA; /* Change this to your desired focus color */

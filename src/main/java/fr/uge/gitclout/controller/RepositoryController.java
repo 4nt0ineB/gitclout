@@ -40,8 +40,7 @@ public class RepositoryController {
     return repository.findById(id).map(ResponseEntity::ok)
                      .orElse(ResponseEntity.notFound().build());
   }
-  
-  
+    
   record GitRepoCreationRequestURL(String url){}
   @PostMapping("")
   ResponseEntity<LightRepository>  create(@RequestBody GitRepoCreationRequestURL request) throws IOException {
@@ -51,6 +50,12 @@ public class RepositoryController {
     }
     return Optional.ofNullable(repository.fetchAndAnalyse(request.url)).map(lightRepository -> ResponseEntity.status(HttpStatus.CREATED).body(lightRepository))
                    .orElse(ResponseEntity.status(HttpStatus.CONFLICT).build());
+  }
+  
+  @GetMapping("/status/{id}")
+  ResponseEntity<AnalysisManager.Status> getStatus(@PathVariable UUID id) {
+    return repository.getStatus(id).map(ResponseEntity::ok)
+                     .orElse(ResponseEntity.notFound().build());
   }
   
   @ResponseStatus(HttpStatus.NO_CONTENT)

@@ -57,6 +57,7 @@ public class RepositoryControllerTest {
                   "fd48f7eb780f03fbe6e248035479cd4eee2b141e",
                   "984fb537cacb1e4c350c885c98ab4181c3aaef5e",
                   List.of("v2")))
+          , List.of("95a96a40-5e35-4cb7-a89e-db60cf674049", "00cc5a0b-817d-4783-b757-761139403298")
       , new AnalysisManager.Status(id, AnalysisManager.Task.Status.DONE, 2, 2)
     ));
     
@@ -131,7 +132,7 @@ public class RepositoryControllerTest {
   @Test
   void shouldDeleteRepositoryWhenGivenValidId() throws Exception {
     var id = UUID.fromString("adaaca1f-58c4-42ec-a28f-887f8090cfe6");
-    doNothing().when(repositoryService).deleteById(id);
+    when(repositoryService.deleteById(id)).thenReturn(true);
     mockMvc.perform(MockMvcRequestBuilders.delete("/api/repository/{id}", id))
            .andExpect(MockMvcResultMatchers.status().isNoContent());
   }

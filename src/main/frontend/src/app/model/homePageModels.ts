@@ -21,3 +21,9 @@ export interface LightRepository {
   tags: LightTags;
   tagsOrder: string[];
 }
+
+export interface Status {
+  status: string;
+  totalTags: number;
+  analyzedTags: number;
+}

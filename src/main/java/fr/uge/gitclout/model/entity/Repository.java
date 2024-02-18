@@ -45,7 +45,7 @@ public class Repository {
   
   
   
- @JsonGetter
+  @JsonGetter
   @JsonProperty("tagsOrder")
   public List<String> tagsOrder(){
     return tags.stream()

@@ -1,22 +1,36 @@
-<div class="container max-w-screen-md mx-auto px-4 md:max-w-screen-md md:px-6 lg:px-8 px-50 pt-20" >
+<div class="container max-w-screen-lg mx-auto px-4 md:max-w-screen-lg md:px-6 lg:px-8 px-50 pt-20" >
+
+  <div class="items-center">
+    <form [formGroup]="urlForm" >
+      <div class="">
+        <input type="text"
+               id="repoAddressField"
+               name="newRepoUrl"
+               class="form-control border-b border-gray-500 focus:border-indigo-500 focus:outline-none invalid:border-amber-300 w-1/2"
+               formControlName="url"
+               placeholder="ex: github.com/user/myrepo"
+               (keydown.enter)="addRepo()"
+               autofocus>
+        <div *ngIf="urlForm.invalid" class="alert">
+          <div *ngIf="urlForm.get('url')?.errors && urlForm.get('url')?.value != ''" class="text-amber-600">
+            <div *ngIf="urlForm.get('url')?.hasError('pattern')">Invalid URL</div>
+          </div>
+        </div>
+      </div>
+    </form>
+  </div>
+  <br>
+  <hr>
+  <br>
+
   <div class="collection" >
     <ng-container *ngFor="let repo of repositories; index as i; first as isFirst" >
-      <a href="#!" class="collection-item "
-         style="text-decoration: none; color: inherit;"
-         [ngClass]="{'active' : isFirst}">
-        <div class="bg-white shadow-md rounded-lg">
-          <app-repository-item [repository]="repo"></app-repository-item>
-        </div>
-      </a>
+        <app-repository-item
+          [repository]="repo"
+          [isOpen]="repositoriesStates[repo.id]"
+          (toggleEvent)="toggleItem(i)"
+          (deleteRepoEvent)="deleteRepo(i)"
+        ></app-repository-item>
     </ng-container>
   </div>
-
-  <hr>
- <br>
-  <form >
-    <div class="">
-      <input type="text"  id="repoAddressField" class="border-b border-gray-500 focus:border-indigo-500 focus:outline-none"
-             placeholder="ex: github.com/user/myrepo"   >
-    </div>
-  </form>
 </div>

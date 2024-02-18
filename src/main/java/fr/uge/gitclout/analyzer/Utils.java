@@ -1,8 +1,11 @@
 package fr.uge.gitclout.analyzer;
 
 
+import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayDeque;
+import java.util.Deque;
 
 public final class Utils {
   
@@ -21,6 +24,27 @@ public final class Utils {
         throw new IllegalStateException("file \""+ path + "\" not found");
       }
       return new String(input.readAllBytes(), StandardCharsets.UTF_8);
+    }
+  }
+  
+  public static void deleteDirectory(File dir) {
+    Deque<File> stack = new ArrayDeque<>();
+    stack.push(dir);
+    
+    while (!stack.isEmpty()) {
+      File current = stack.pop();
+      File[] files = current.listFiles();
+      
+      if (files != null) {
+        for (File file : files) {
+          if (file.isDirectory()) {
+            stack.push(file);
+          } else {
+            file.delete();
+          }
+        }
+      }
+      current.delete();
     }
   }
 }

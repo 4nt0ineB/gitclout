@@ -9,5 +9,6 @@ import java.util.Map;
 import java.util.UUID;
 
 public record LightRepository(UUID id, String user, String name, String url, Map<String, LightTag> tags,
+                              List<String> tagsOrder,
                               @JsonUnwrapped
                               AnalysisManager.Status status) {}

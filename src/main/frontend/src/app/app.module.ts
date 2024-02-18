@@ -8,12 +8,13 @@ import {HttpClientModule} from "@angular/common/http";
 import {CommonModule} from "@angular/common";
 import { HomeComponent } from './home/home.component';
 import { RepositoryItemComponent } from './repository-item/repository-item.component';
+import { RepositoryDetailComponent } from './repository-detail/repository-detail.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     HomeComponent,
-    RepositoryItemComponent, HomeComponent, RepositoryItemComponent
+    RepositoryItemComponent, HomeComponent, RepositoryItemComponent, RepositoryDetailComponent
   ],
   imports: [
     BrowserModule,

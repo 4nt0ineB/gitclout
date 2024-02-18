@@ -9,10 +9,7 @@ import org.springframework.beans.factory.annotation.Value;
 
 import java.io.File;
 import java.io.IOException;
-import java.util.List;
-import java.util.Locale;
-import java.util.Objects;
-import java.util.UUID;
+import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.LinkedBlockingQueue;
 import java.util.function.Consumer;
@@ -237,4 +234,29 @@ public class AnalysisManager {
     var tagsNumber = repository.getTags().size();
     return new Status(repository.getId(), Task.Status.DONE, tagsNumber, tagsNumber);
   }
+  
+  public boolean deleteLocalRepoDir(Repository repository) {
+    var repoDir = new File(repository.getPath());
+    LOGGER.info("entering deletion");
+    if(repoDir.exists() && repoDir.isDirectory()){
+      //Utils.deleteDirectory(repoDir);
+      LOGGER.info("dir exists");
+      deleteDirectory(repoDir);
+      return true;
+    }
+    return false;
+  }
+  
+  private void deleteDirectory(File dir){
+    for(var file: dir.listFiles()){
+      LOGGER.info("deleting " + file.getName());
+      if(file.isDirectory()){
+        deleteDirectory(file);
+      }
+      file.delete();
+    }
+    dir.delete();
+  }
+  
+  
 }
