@@ -1,0 +1,78 @@
+
+<div class="flex flex-nowrap justify-start m-auto p-2 overflow-x-scroll"  (wheel)="onWheel($event)">
+  <ng-container *ngFor="let tagId of repository.tagsOrder; index as i; first as isFirst" style="padding: 1em;" >
+      <div
+        (click)="selectTag(tagId);"
+        style="margin-right: 0.5em; background-color: {{ tagId ==  tagSha1 ? 'white' : Utils.getColor(i, repository.tagsOrder.length) }};"
+
+           class="mr-6 mb-1 p-1 text-sm whitespace-nowrap cursor-pointer
+                  bg-opacity-20
+                  hover:ring-blue-500 focus:ring-opacity-50  hover:opacity-85 py-1 px-3 rounded
+                  hover:bg-neutral-300
+                  font-sans
+                  ">
+        {{repository.tags[tagId].name}}
+      </div>
+
+<!--
+[class]="{'bg-neutral-500': tagId ==  tagSha1}"
+background-color: {{ tagId ==  tagSha1 ? 'white' : Utils.getColor(i, repository.tagsOrder.length) }};"   -->
+  </ng-container>
+</div>
+<hr>
+<div class="flex flex-wrap">
+  <div class="flex-1 bg-white shadow-md rounded-lg">
+    <div class="container max-w-screen-lg mx-auto px-4 md:max-w-screen-lg md:px-6 lg:px-8 px-50 pt-5" >
+      <!-- repository-details.component.html -->
+      <div class="container mx-auto mt-8">
+        <div class="bg-white shadow-md rounded-lg overflow-hidden">
+          <div class="p-6">
+            <h2 class="text-2xl font-semibold mb-4">{{ repository.name }}</h2>
+            <div class="mb-4">
+              <p class="text-gray-600">Owner: {{ repository.username }}</p>
+              <p class="text-gray-600">Status: {{ repository.status }}</p>
+              <p class="text-gray-600">Total Tags: {{ repository.totalTags }}</p>
+              <p class="text-gray-600">Analyzed Tags: {{ repository.analyzedTags }}</p>
+            </div>
+            <div class="mb-4">
+              <h3 class="text-lg font-semibold mb-2">Tags:</h3>
+              ...
+            </div>
+            <div>
+              <a class="text-blue-500" href="{{ repository.url }}" target="_blank">View Repository</a>
+            </div>
+            <button (click)="toggleGrouping()" class="px-4 mt-2 py-2 bg-blue-500 text-white rounded-md shadow-md hover:bg-blue-600 transition duration-300 ease-in-out">Toggle Grouping</button>
+
+            <select class="block w-full px-4 py-2 border mt-2 rounded-md shadow-sm focus:outline-none focus:border-blue-500">
+              <option value="" disabled selected>Select an option</option>
+              <option value="option1">Option 1</option>
+              <option value="option2">Option 2</option>
+              <option value="option3">Option 3</option>
+            </select>
+
+          </div>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="flex-grow bg-white shadow-md rounded-lg" >
+    <div class=" max-w-screen-lg mx-auto px-4 pt-8" style="height: 20em;" >
+      <app-bar-chart
+        [transformedData]="getChartData()"
+      ></app-bar-chart>
+    </div>
+  </div>
+</div>
+<div class="flex flex-nowrap justify-start m-auto p-2 overflow-x-scroll p-8" >
+  <ng-container *ngFor="let user of users; index as i; first as isFirst" style="padding: 1em;" >
+    <div style="max-width: calc(100vw / 7);" class=" mx-auto p-3 mb-3 bg-white shadow-md rounded-lg" >
+      <app-radar-chart
+        [contributor]="contributionOf(user)"
+      ></app-radar-chart>
+
+      <div class="text-center text-neutral-600">{{user}}</div>
+    </div>
+
+  </ng-container>
+</div>

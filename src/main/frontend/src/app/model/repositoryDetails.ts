@@ -1,19 +1,21 @@
-interface TagContribution {
-  [category: string]: {
-    [subcategory: string]: number
-  };
+
+
+
+interface LineContribution {
+  [subcategory: string]: number;
 }
 
-interface Contributions {
-  [username: string]: TagContribution;
+interface TagContribution {
+  [category: string]: LineContribution;
 }
+
 
 export interface Tag {
   id: string;
   sha1: string;
   name: string[];
   contributions: {
-    [contributor: string]: Contributions;
+    [contributor: string]: TagContribution;
   };
   parent: string | null;
 }
