@@ -53,7 +53,7 @@ and other types of contributions in a given git repository :
 ### Credits
 
 Many thanks to Dominik Stadler's jgit-cookbook repository and Rüdiger Herrmann for his post on Diffs with JGit
-that allowed us to better understand and deal with the JGit API.<br>
+that allowed to better understand and deal with the JGit API.<br>
 
 https://github.com/centic9/jgit-cookbook <br>
 https://www.codeaffine.com/2016/06/16/jgit-diff/
