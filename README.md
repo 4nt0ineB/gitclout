@@ -7,7 +7,7 @@ The back-end uses Java with Spring Boot 3 with WebMVC to serve a REST API and th
 
 The front-end uses Angular 17 and tailwind.
 
-***Ongoing re-implementation of the original [GitClout app](https://gitlab.com/4nt0ineB/sebbah-bastos),*** with new frameworks
+***Ongoing re-implementation of the original [GitClout app](https://gitlab.com/4nt0ineB/sebbah-bastos),*** with new frameworks.
 
 ### Run the app
 ```sh
@@ -39,7 +39,7 @@ You can override some default properties with inline options at app start
 ### Programming language support
 
 As of today GitClout app v1.0.0 supports these programming languages,
-and other types of contributions in a given git repository:
+and other types of contributions in a given git repository :
 
 
 | Category | Type                                                                                                          | 
