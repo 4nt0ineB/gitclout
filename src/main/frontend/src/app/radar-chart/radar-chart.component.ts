@@ -1,4 +1,4 @@
-import {Component, ElementRef, Input, OnChanges, SimpleChanges, ViewChild} from '@angular/core';
+import {Component, ElementRef, HostListener, Input, OnChanges, SimpleChanges, ViewChild} from '@angular/core';
 import { ChartConfiguration, ChartData, ChartEvent, ChartType } from 'chart.js';
 import {BaseChartDirective} from "ng2-charts";
 
@@ -7,29 +7,25 @@ import {BaseChartDirective} from "ng2-charts";
   templateUrl: './radar-chart.component.html',
   styleUrl: './radar-chart.component.css'
 })
-export class RadarChartComponent implements OnChanges {
+export class RadarChartComponent  {
   @Input()
   contributor!: { labels: string[]; datasets: any[] };
   @ViewChild(BaseChartDirective)
   chart: BaseChartDirective | undefined;
   @ViewChild('chartCanvas') chartCanvas!: ElementRef;
-
+  public radarChartData: ChartData<'radar'> = {
+    labels: [],
+    datasets: [],
+  };
+  public radarChartType: ChartType = 'radar';
   public radarChartOptions: ChartConfiguration['options'] = {
     plugins: {
-      title: {
-        display: true,
-        text: `Contributions of none`,
-        font: {
-          size: 16,
-        },
-      },
+
       legend: {
         display: false,
         position: "bottom",
       },
-      tooltip: {
-        enabled: true,
-      },
+
     },
     scales: {
       r: {
@@ -40,17 +36,17 @@ export class RadarChartComponent implements OnChanges {
 
   };
 
-  public radarChartData: ChartData<'radar'> = {
-    labels: [],
-    datasets: [],
-  };
-  public radarChartType: ChartType = 'radar';
+  ngOnInit() {
+    this.updateChartData();
+  }
 
-  ngOnChanges(changes: SimpleChanges): void {
+/*  ngOnChanges(changes: SimpleChanges): void {
     if (changes['contributor'] && this.contributor) {
       this.updateChartData();
     }
-  }
+    console.log("update !");
+
+  }*/
 
   config = {
     backgroundColor: 'rgba(255, 99, 132, 0.2)',
@@ -66,5 +62,20 @@ export class RadarChartComponent implements OnChanges {
     if (this.chart) {
       this.chart.update();
     }
+    console.log("update !");
+  }
+
+  @HostListener('window:resize', ['$event'])
+  onResize(event: any): void {
+    // Update chart dimensions on window resize
+    if (this.chart) {
+      const chartElement = this.chart.chart?.canvas;
+      if (chartElement) {
+        chartElement.width = chartElement.offsetWidth;
+        chartElement.height = chartElement.offsetHeight;
+      }
+    }
+
+    this.chart?.update();
   }
 }

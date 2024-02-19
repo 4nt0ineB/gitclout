@@ -22,7 +22,7 @@ public class Repository {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
   private UUID id;
-  private String userName;
+  private String username;
   private String name;
   private String url;
   private @JsonIgnore String path;
@@ -33,11 +33,12 @@ public class Repository {
   
   public Repository() {}
   
-  public Repository(String name, String url, String path, String head) {
+  public Repository(String name, String username, String url, String path, String head) {
     Objects.requireNonNull(name, "The name can't be null");
     Objects.requireNonNull(url, "The url can't be null");
     Objects.requireNonNull(path, "The path can't be null");
     this.name = name;
+    this.username = username;
     this.url = url;
     this.path = path;
     this.head = head;
@@ -92,7 +93,7 @@ public class Repository {
   
   public Repository withTags(List<Tag> tags){
     Objects.requireNonNull(tags);
-    return new Repository(name, url, path, head);
+    return new Repository(name, username, url, path, head);
   }
   
   @Override

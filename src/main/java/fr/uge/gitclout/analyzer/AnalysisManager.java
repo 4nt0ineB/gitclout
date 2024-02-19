@@ -219,13 +219,14 @@ public class AnalysisManager {
     var matcher = pattern.matcher(url);
     if (matcher.matches()) {
       var repositoryName = matcher.group("repositoryName");
-      var localRepositoryPath = gitRepositoryRootPath + "/repositories/" + matcher.group("userName") + "-" + repositoryName;
+      var username = matcher.group("userName");
+      var localRepositoryPath = gitRepositoryRootPath + "/repositories/" + username + "-" + repositoryName;
       // download
       var file = new File(localRepositoryPath);
       if (file.exists()) {
         throw new IllegalArgumentException("The repository already exists");
       }
-      return new Repository(repositoryName, url, localRepositoryPath, null);
+      return new Repository(repositoryName, username, url, localRepositoryPath, null);
     }
     throw new IllegalArgumentException("bad formatted git repository url");
   }

@@ -59,7 +59,7 @@ export class HomeComponent implements OnInit {
           }
         });
       });
-    const interval$ = interval(1500);
+    const interval$ = interval(2000);
     interval$.pipe().subscribe(() => {
       this.repositoryService.getRepositories()
         .subscribe((res: LightRepository[]) => {

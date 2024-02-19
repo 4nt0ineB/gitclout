@@ -61,7 +61,7 @@ public class RepositoryService {
     var tags = repository.getTags().stream().collect(Collectors.toMap(Tag::tagId, t -> new LightTag(t.id(), t.tagId(), t.parentId(), List.of(t.name()))));
     return new LightRepository(
         repository.getId(),
-        repository.getUserName(),
+        repository.getUsername(),
         repository.getName(),
         repository.getUrl(),
         tags,

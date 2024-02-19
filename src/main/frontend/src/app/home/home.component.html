@@ -1,28 +1,28 @@
-<div class="container max-w-screen-lg mx-auto px-4 md:max-w-screen-lg md:px-6 lg:px-8 px-50 pt-20" style="min-height: 80vh;">
-
-  <div class="items-center">
-    <form [formGroup]="urlForm" >
-      <div class="">
-        <input type="text"
-               id="repoAddressField"
-               name="newRepoUrl"
-               class="form-control border-b border-gray-500 focus:border-indigo-500 focus:outline-none invalid:border-amber-300 w-1/2"
-               formControlName="url"
-               placeholder="ex: github.com/user/myrepo"
-               (keydown.enter)="addRepo()"
-               autofocus>
-        <div *ngIf="urlForm.invalid" class="alert">
-          <div *ngIf="urlForm.get('url')?.errors && urlForm.get('url')?.value != ''" class="text-amber-600">
-            <div *ngIf="urlForm.get('url')?.hasError('pattern')">Invalid URL</div>
+<div class="container max-w-screen-lg mx-auto px-4 md:max-w-screen-lg font-sans font-light  md:px-6 lg:px-8 px-50 pt-20" style="min-height: 80vh;">
+  <h1 class="flex justify-center mb-10 text-lg  ">Repositories</h1>
+  <div class="repo-item shadow-md rounded-lg text-lg text-gray-800  p-4" >
+    <div class="flex items-center ">
+      <div class="flex-1 cursor-pointer" >
+        <form [formGroup]="urlForm" >
+          <div class="">
+            <input type="text"
+                   id="repoAddressField"
+                   name="newRepoUrl"
+                   class="form-control border-b border-gray-500 focus:border-indigo-500 focus:outline-none invalid:border-amber-300 w-1/2"
+                   formControlName="url"
+                   placeholder="ex: github.com/user/myrepo"
+                   (keydown.enter)="addRepo()"
+                   autofocus>
+            <div *ngIf="urlForm.invalid" class="alert">
+              <div *ngIf="urlForm.get('url')?.errors && urlForm.get('url')?.value != ''" class="text-amber-600">
+                <div *ngIf="urlForm.get('url')?.hasError('pattern')">Invalid URL</div>
+              </div>
+            </div>
           </div>
-        </div>
+        </form>
       </div>
-    </form>
+    </div>
   </div>
-  <br>
-  <hr>
-  <br>
-
   <div class="collection" >
     <ng-container *ngFor="let repo of repositories; index as i; first as isFirst" >
         <app-repository-item
@@ -32,10 +32,13 @@
           (deleteRepoEvent)="deleteRepo(i)"
         ></app-repository-item>
     </ng-container>
+    <div *ngIf="repositories.length == 0">
+      <div class="flex justify-center cursor-pointer text-neutral-300 pt-20">
+        ...empty
+      </div>
+    </div>
   </div>
 </div>
-
-
 <div class="flex justify-center cursor-pointer text-neutral-400" style="marg-top: 15em;">
   <a href="https://github.com/4nt0ineB/gitclout" target="_blank">
     <svg xmlns="http://www.w3.org/2000/svg" width="2em" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1" stroke-linecap="round" stroke-linejoin="round" class="feather feather-github">

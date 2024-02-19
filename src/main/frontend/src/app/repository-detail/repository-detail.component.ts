@@ -158,7 +158,6 @@ export class RepositoryDetailComponent {
         });
       }
     }
-    console.log({labels, datasets});
     return { labels, datasets };
   }
 }
