@@ -3,12 +3,11 @@
 ## The project
 GitClout is a web app that analyzes a specified Git repository (e.g. github or gitlab) to offers insights into the contributions made by each contributor.
 
-The back-end uses Java with Spring Boot v3 (Spring Framework 6) with WebMVC to serve a REST API and the static pages.
+The back-end uses Java with Spring Boot 3 with WebMVC to serve a REST API and the static pages.
 
-The front-end uses angular 16 and tailwind.
+The front-end uses Angular 17 and tailwind.
 
-***Ongoing re-implementation of the original [GitClout app](https://gitlab.com/4nt0ineB/sebbah-bastos) developped by [val.sebb](https://gitlab.com/val.sebb) and I,***
-using different back-end and front-end frameworks.
+***Ongoing re-implementation of the original [GitClout app](https://gitlab.com/4nt0ineB/sebbah-bastos),*** with new frameworks
 
 ### Run the app
 ```sh
