@@ -8,7 +8,7 @@ import {RepositoryDetails} from "../model/repositoryDetails";
   providedIn: 'root'
 })
 export class RepositoryService {
-  private api = "http://localhost:8080/api/repository/";
+  private api = "/api/repository/";
 
   constructor(private http: HttpClient) { }
 

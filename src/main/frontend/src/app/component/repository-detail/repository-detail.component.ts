@@ -16,7 +16,6 @@ export class RepositoryDetailComponent {
   users: string[] = [];
   sorting = '';
 
-
   chartData: { labels: string[], datasets: any[] } = {
     labels: [],
     datasets: []
@@ -89,8 +88,6 @@ export class RepositoryDetailComponent {
   toggleGrouping(){
     this.byCatagory = !this.byCatagory;
   }
-
-
 
   transformData(byCategory: boolean): { labels: string[], datasets: any[] } {
     const labels: string[] = [];

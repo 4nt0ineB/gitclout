@@ -11,6 +11,6 @@ public class ApplicationStartupListener implements ApplicationListener<Applicati
     public void onApplicationEvent(ApplicationReadyEvent event) {
         String serverUrl = "http://localhost:" + event.getApplicationContext().getEnvironment().getProperty("server.port");
         System.out.println("WEB server is up! " + serverUrl);
-        System.out.println("OPEN API " + serverUrl + "/openapi/ui");
+        System.out.println("OPEN API swagger " + serverUrl + "/swagger-ui");
     }
 }
