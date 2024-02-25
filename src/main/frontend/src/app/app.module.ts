@@ -2,16 +2,16 @@ import { NgModule } from '@angular/core';
 import { BrowserModule } from '@angular/platform-browser';
 
 import { AppRoutingModule } from './app-routing.module';
-import { AppComponent } from './app.component';
+import { AppComponent } from './component/app.component';
 import {FormsModule, ReactiveFormsModule} from "@angular/forms";
 import {HttpClientModule} from "@angular/common/http";
 import {CommonModule} from "@angular/common";
-import { HomeComponent } from './home/home.component';
-import { RepositoryItemComponent } from './repository-item/repository-item.component';
-import { RepositoryDetailComponent } from './repository-detail/repository-detail.component';
 import { NgChartsModule } from 'ng2-charts';
-import {BarChartComponent} from "./bar-chart/bar-chart.component";
-import {RadarChartComponent} from "./radar-chart/radar-chart.component";
+import {HomeComponent} from "./component/home/home.component";
+import {BarChartComponent} from "./component/bar-chart/bar-chart.component";
+import {RepositoryItemComponent} from "./component/repository-item/repository-item.component";
+import {RadarChartComponent} from "./component/radar-chart/radar-chart.component";
+import {RepositoryDetailComponent} from "./component/repository-detail/repository-detail.component";
 
 @NgModule({
   declarations: [

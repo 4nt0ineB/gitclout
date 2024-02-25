@@ -1,8 +1,6 @@
 import {Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {LightRepository} from "../model/homePageModels";
-import {from, Observable} from 'rxjs';
-import { map } from 'rxjs/operators';
-import {Utils} from "../utils";
+import {LightRepository} from "../../model/homePageModels";
+import {Utils} from "../../utils";
 
 @Component({
   selector: 'app-repository-item',

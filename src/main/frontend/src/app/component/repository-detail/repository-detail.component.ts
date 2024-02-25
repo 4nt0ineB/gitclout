@@ -1,8 +1,8 @@
 import {Component, HostListener, signal} from '@angular/core';
 import {ActivatedRoute, Router} from "@angular/router";
-import {RepositoryDetails, Tag} from "../model/repositoryDetails";
-import {RepositoryService} from "../repository.service";
-import {Utils} from "../utils";
+import {RepositoryDetails, Tag} from "../../model/repositoryDetails";
+import {RepositoryService} from "../../service/repository.service";
+import {Utils} from "../../utils";
 @Component({
   selector: 'app-repository-detail',
   templateUrl: './repository-detail.component.html',
@@ -14,6 +14,8 @@ export class RepositoryDetailComponent {
   protected readonly Utils = Utils;
   byCatagory: boolean = false;
   users: string[] = [];
+  sorting = '';
+
 
   chartData: { labels: string[], datasets: any[] } = {
     labels: [],
@@ -27,11 +29,45 @@ export class RepositoryDetailComponent {
 
   constructor(private route: ActivatedRoute, private router: Router, private repositoryService: RepositoryService) { }
 
+  currentLabels() {
+    let data = this.byCatagory ? this.chartData : this.chartDataCategory;
+    return data.datasets.map(value => value.label).sort();
+  }
+
   onWheel(event: WheelEvent) {
     event.preventDefault(); // Prevent default vertical scrolling
     const delta = Math.max(-1, Math.min(1, (event.deltaY || -event.detail)));
     const container = event.currentTarget as HTMLElement;
     container.scrollLeft += delta * 60; // Adjust scroll speed as needed
+  }
+
+  choseSorting(newSortingLabel: string) {
+    let data = this.byCatagory ? this.chartData : this.chartDataCategory;
+    let labelData = data.datasets.find(obj => obj.label === newSortingLabel);
+    console.log("----");
+    console.log(data);
+    if (labelData) {
+      let lines: number[] = labelData.data;
+      let permutation = lines.map((value, i) => ({ i, value }))
+        .sort((a, b) => a.value - b.value)
+        .map(tmp => tmp.i);
+      data.datasets.forEach(value => {
+        if (value.data) {
+          value.data = this.organizeArray(value.data, permutation);
+        }
+      });
+      data.labels = this.organizeArray(data.labels, permutation);
+    }
+    console.log(data);
+
+  }
+
+  organizeArray(originalArray: any[], permutation: number[]): any[] {
+    const newArray = new Array(originalArray.length);
+    for (let i = 0; i < originalArray.length; i++) {
+      newArray[i] = originalArray[permutation[i]];
+    }
+    return newArray;
   }
 
   getChartData(): { labels: string[], datasets: any[] } {
@@ -50,68 +86,48 @@ export class RepositoryDetailComponent {
     this.router.navigateByUrl(url);
   }
 
-
   toggleGrouping(){
     this.byCatagory = !this.byCatagory;
   }
 
-  transformData(byCatagory: boolean): { labels: string[], datasets: any[] } {
+
+
+  transformData(byCategory: boolean): { labels: string[], datasets: any[] } {
     const labels: string[] = [];
     const datasets: any[] = [];
-
-    // Retrieve contributions for the selected tag
     const selectedTag = this.repository.tags[this.tagSha1];
-
-    // Iterate through each contributor's contributions for the selected tag
     for (const contributor in selectedTag.contributions) {
       const contributions = selectedTag.contributions[contributor];
-
-      // Check if the contributor is already in labels, if not, add it
       if (!labels.includes(contributor)) {
         labels.push(contributor);
       }
-
-      // Create a dataset for each type of contribution
       for (const type in contributions) {
         const tagContribution = contributions[type];
-        if(byCatagory){
+        if(byCategory){
           for(const subType in tagContribution){
-            let value = tagContribution[subType];
-
-            // Check if a dataset already exists for this type
-            const existingDatasetIndex = datasets.findIndex(dataset => dataset.label === subType);
-            if (existingDatasetIndex !== -1) {
-              // If exists, add the value to the corresponding contributor
-              datasets[existingDatasetIndex].data.push(value);
-            } else {
-              // If not, create a new dataset
-              datasets.push({
-                label: subType,
-                data: [value],
-                stack: 'stack',
-              });
-            }
+            const value = tagContribution[subType];
+            this.updateDatasets(subType, value, datasets);
           }
-
-        }else{
-          let value = Array.from(Object.values(tagContribution)).reduce((pre, curr) => pre+curr);
-          // Check if a dataset already exists for this type
-          const existingDatasetIndex = datasets.findIndex(dataset => dataset.label === type);
-          if (existingDatasetIndex !== -1) {
-            // If exists, add the value to the corresponding contributor
-            datasets[existingDatasetIndex].data.push(value);
-          } else {
-            // If not, create a new dataset
-            datasets.push({
-              label: type,
-              data: [value],
-              stack: 'stack',
-            });
-          }
+        } else {
+          const value = Object.values(tagContribution).reduce((prev, curr) => prev + curr);
+          this.updateDatasets(type, value, datasets);
         }
       }
     }
-   return { labels, datasets };
+    return { labels, datasets };
+  }
+
+  updateDatasets(label: string, value: any, datasets: any[]) {
+    const existingDatasetIndex = datasets.findIndex(dataset => dataset.label === label);
+    if (existingDatasetIndex !== -1) {
+      datasets[existingDatasetIndex].data.push(value);
+    } else {
+      datasets.push({
+        label: label,
+        data: [value],
+        stack: 'stack',
+      });
+    }
   }
 
   contributors(repository: RepositoryDetails, tagSha1: string): string[] {
@@ -132,12 +148,10 @@ export class RepositoryDetailComponent {
     });
   }
 
-
   contributionOf(user: string): { labels: string[], datasets: any[] }  {
     const contributions = this.repository.tags[this.tagSha1].contributions[user];
     const labels: string[] = ["CODE", "COMMENT", "BUILD"];
     const datasets: any[] = [];
-
     for (const type in contributions) {
       const tagContribution = contributions[type];
       let value = Array.from(Object.values(tagContribution)).reduce((pre, curr) => pre+curr);
@@ -160,4 +174,7 @@ export class RepositoryDetailComponent {
     }
     return { labels, datasets };
   }
+
+
+
 }

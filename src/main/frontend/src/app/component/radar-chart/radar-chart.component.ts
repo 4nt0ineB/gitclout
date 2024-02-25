@@ -40,14 +40,6 @@ export class RadarChartComponent  {
     this.updateChartData();
   }
 
-/*  ngOnChanges(changes: SimpleChanges): void {
-    if (changes['contributor'] && this.contributor) {
-      this.updateChartData();
-    }
-    console.log("update !");
-
-  }*/
-
   config = {
     backgroundColor: 'rgba(255, 99, 132, 0.2)',
     borderColor: 'rgba(255, 99, 132, 1)',
@@ -67,7 +59,6 @@ export class RadarChartComponent  {
 
   @HostListener('window:resize', ['$event'])
   onResize(event: any): void {
-    // Update chart dimensions on window resize
     if (this.chart) {
       const chartElement = this.chart.chart?.canvas;
       if (chartElement) {

@@ -3,8 +3,6 @@ package fr.uge.gitclout.model.entity;
 import com.fasterxml.jackson.annotation.JsonInclude;
 import fr.uge.gitclout.analyzer.FileTypes;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.Setter;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -13,8 +11,6 @@ import java.util.stream.Collectors;
 
 @Table(name = "tag_contribution")
 @Entity
-@Getter
-@Setter
 public class Contribution {
   @Id
   @GeneratedValue(strategy = GenerationType.UUID)
@@ -22,7 +18,7 @@ public class Contribution {
   private UUID tagId;
   private String username;
   @ElementCollection
-  @CollectionTable(name="contributions", joinColumns={@JoinColumn(name="tag_contribution_id", referencedColumnName="id")})
+  @CollectionTable(name = "contributions", joinColumns = {@JoinColumn(name = "tag_contribution_id", referencedColumnName = "id")})
   @MapKeyColumn(name = "type")
   @Column(name = "price")
   @JsonInclude
@@ -51,5 +47,37 @@ public class Contribution {
                        o.putAll(o2);
                        return o;
                      }, HashMap::new));
+  }
+  
+  public UUID getId() {
+    return this.id;
+  }
+  
+  public UUID getTagId() {
+    return this.tagId;
+  }
+  
+  public String getUsername() {
+    return this.username;
+  }
+  
+  public Map<String, Integer> getDetail() {
+    return this.detail;
+  }
+  
+  public void setId(UUID id) {
+    this.id = id;
+  }
+  
+  public void setTagId(UUID tagId) {
+    this.tagId = tagId;
+  }
+  
+  public void setUsername(String username) {
+    this.username = username;
+  }
+  
+  public void setDetail(Map<String, Integer> detail) {
+    this.detail = detail;
   }
 }

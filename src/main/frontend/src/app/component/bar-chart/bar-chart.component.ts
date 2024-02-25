@@ -40,7 +40,7 @@ export class BarChartComponent implements OnChanges {
     plugins: {
       title: {
         display: true,
-        text: 'Contributions by Collaborator and Type',
+        text: 'Contributions by Collaborator',
         font: {
           size: 16,
         },
@@ -77,6 +77,8 @@ export class BarChartComponent implements OnChanges {
     if (this.chart) {
       this.chart.update();
     }
+    console.log(this.barChartData);
+
   }
 
   @HostListener('window:resize', ['$event'])
@@ -89,7 +91,6 @@ export class BarChartComponent implements OnChanges {
         chartElement.height = chartElement.offsetHeight;
       }
     }
-
     this.chart?.update();
   }
 }

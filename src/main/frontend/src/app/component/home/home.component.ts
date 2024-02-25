@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
-import {RepositoryService} from "../repository.service";
-import {LightRepository} from "../model/homePageModels";
+import {RepositoryService} from "../../service/repository.service";
+import {LightRepository} from "../../model/homePageModels";
 import {ActivatedRoute} from "@angular/router";
 import {interval, take} from "rxjs";
 import {FormBuilder, FormControl, FormGroup, Validators} from "@angular/forms";
