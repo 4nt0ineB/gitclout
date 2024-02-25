@@ -17,7 +17,7 @@ java --enable-preview -jar gitclout-1.0.0.jar
 At start, the address of the web main page will be printed out as well as the swagger page address of the OPEN API file, for example :
 ```shell
 WEB server is up! http://localhost:8080
-OPEN API http://localhost:8080/openapi/ui
+OPEN API http://localhost:8080/swagger-ui
 ```
 
 #### Configuration
